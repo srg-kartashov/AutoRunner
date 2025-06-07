@@ -10,12 +10,6 @@ jobs:
     - name: Checkout repository
       uses: actions/checkout@v3
 
-    - name: Setup SSH key
-      uses: azure/setup-ssh@v1
-      with:
-        ssh-private-key: ${{ secrets.SERVER_SSH_KEY }}
-        ssh-passphrase: ${{ secrets.SERVER_SSH_KEY_PASSPHRASE }}
-
     - name: Upload project to server via SCP
       uses: appleboy/scp-action@v0.1.4
       with:
