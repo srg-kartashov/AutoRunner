@@ -1,8 +1,6 @@
 name: Build & Deploy to Hetzner (Docker only)
 
 on:
-  push:
-    branches: [ "main" ]
   workflow_dispatch:
 jobs:
   deploy:
@@ -11,6 +9,12 @@ jobs:
     steps:
     - name: Checkout repository
       uses: actions/checkout@v3
+
+    - name: Setup SSH agent with passphrase
+      uses: webfactory/ssh-agent@v0.8.1
+      with:
+        ssh-private-key: ${{ secrets.SERVER_SSH_KEY }}
+        ssh-passphrase: ${{ secrets.SERVER_SSH_KEY_PASSPHRASE }}
 
     - name: Upload project to server via SCP
       uses: appleboy/scp-action@v0.1.4
