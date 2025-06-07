@@ -1,0 +1,43 @@
+name: Build & Deploy to Hetzner (Docker only)
+
+on:
+  workflow_dispatch:
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v3
+
+    - name: Upload project to server via SCP
+      uses: appleboy/scp-action@v0.1.4
+      with:
+        host: ${{ secrets.SERVER_IP }}
+        username: root
+        key: ${{ secrets.SERVER_SSH_KEY }}
+        source: "."
+        target: "/opt/autorunner"
+
+    - name: Build and restart container via SSH
+      uses: appleboy/ssh-action@v1.0.0
+      with:
+        host: ${{ secrets.SERVER_IP }}
+        username: root
+        key: ${{ secrets.SERVER_SSH_KEY }}
+        script: |
+          cd /opt/autorunner
+
+          echo "Stopping and removing old container (if any)..."
+          docker stop autorunner || true
+          docker rm autorunner || true
+
+          echo "Building Docker image..."
+          docker build -t autorunner:latest .
+
+          echo "Starting new container..."
+          docker run -d \
+            --name autorunner \
+            -e APP_UID=1000 \
+            -p 5000:8080 \
+            autorunner:latest
