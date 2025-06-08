@@ -1,5 +1,6 @@
 using Hangfire;
 using Hangfire.Dashboard;
+using Hangfire.Dashboard.BasicAuthorization;
 using Hangfire.PostgreSql;
 
 namespace AutoRunner
@@ -44,10 +45,25 @@ namespace AutoRunner
 
             app.MapControllers();
 
-            // Hangfire Dashboard (optional - remove or secure in prod)
-            app.UseHangfireDashboard(options: new DashboardOptions
+            app.UseHangfireDashboard(options: new DashboardOptions()
             {
-                Authorization = new[] { new AllowAllDashboardAuthorizationFilter() }
+                Authorization =
+                [
+                    new BasicAuthAuthorizationFilter(new BasicAuthAuthorizationFilterOptions()
+                    {
+                        RequireSsl = false,
+                        SslRedirect = false,
+                        LoginCaseSensitive = true,
+                        Users = new []
+                        {
+                            new BasicAuthAuthorizationUser()
+                            {
+                                Login = builder.Configuration["Hangfire:Login"],
+                                PasswordClear = builder.Configuration["Hangfire:Password"]
+                            }
+                        }
+                    })
+                ]
             });
 
             app.Run();
@@ -57,7 +73,7 @@ namespace AutoRunner
     {
         public bool Authorize(DashboardContext context)
         {
-            return true; 
+            return true;
         }
     }
 }
