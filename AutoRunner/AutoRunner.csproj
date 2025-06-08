@@ -8,6 +8,16 @@
     <DockerDefaultTargetOS>Linux</DockerDefaultTargetOS>
   </PropertyGroup>
 
+  <ItemGroup>
+    <None Remove="AutoRunner.http" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Content Include="AutoRunner.http">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+  </ItemGroup>
+
 	<ItemGroup>
 		<PackageReference Include="Hangfire" Version="1.8.14" />
 		<PackageReference Include="Hangfire.AspNetCore" Version="1.8.14" />
