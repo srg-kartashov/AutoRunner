@@ -39,5 +39,6 @@ jobs:
           docker run -d \
             --name autorunner \
             -e APP_UID=1000 \
+            -e ConnectionStrings__DefaultConnection="${{ secrets.DEFAULT_CONNECTION_STRING }}" \
             -p 5000:5000 \
             autorunner:latest
