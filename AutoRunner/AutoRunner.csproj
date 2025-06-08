@@ -42,4 +42,11 @@
 	  <Folder Include="Controllers\" />
 	</ItemGroup>
 
+	<ItemGroup>
+		<Content Include="wwwroot\favicon.ico">
+			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+			<CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+		</Content>
+	</ItemGroup>
+
 </Project>
