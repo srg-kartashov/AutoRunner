@@ -1,6 +1,4 @@
 using Hangfire;
-using Hangfire.Dashboard;
-using Hangfire.Dashboard.BasicAuthorization;
 using Hangfire.PostgreSql;
 
 namespace AutoRunner
