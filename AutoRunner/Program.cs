@@ -45,6 +45,9 @@ namespace AutoRunner
 
             app.MapControllers();
 
+#if DEBUG
+            app.UseHangfireDashboard();
+#else
             app.UseHangfireDashboard(options: new DashboardOptions()
             {
                 Authorization =
@@ -65,15 +68,9 @@ namespace AutoRunner
                     })
                 ]
             });
+#endif
 
             app.Run();
-        }
-    }
-    public class AllowAllDashboardAuthorizationFilter : IDashboardAuthorizationFilter
-    {
-        public bool Authorize(DashboardContext context)
-        {
-            return true;
         }
     }
 }
