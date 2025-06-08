@@ -1,4 +1,5 @@
 using Hangfire;
+using Hangfire.Dashboard.BasicAuthorization;
 using Hangfire.PostgreSql;
 
 namespace AutoRunner
@@ -50,6 +51,9 @@ namespace AutoRunner
 #else
             app.UseHangfireDashboard(options: new DashboardOptions()
             {
+                DashboardTitle = "AutoRunner",
+                FaviconPath = "/favicon.ico",
+                DarkModeEnabled = true,
                 Authorization =
                 [
                     new BasicAuthAuthorizationFilter(new BasicAuthAuthorizationFilterOptions()
