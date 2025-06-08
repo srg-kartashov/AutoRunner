@@ -1,3 +1,6 @@
+using Hangfire;
+using Hangfire.PostgreSql;
+
 namespace AutoRunner
 {
     public class Program
@@ -7,23 +10,41 @@ namespace AutoRunner
             var builder = WebApplication.CreateBuilder(args);
 
             // Add services to the container.
-
             builder.Services.AddControllers();
 
-            #if RELEASE
-                builder.WebHost.UseUrls("http://0.0.0.0:5000");
-            #endif
+
+            builder.Services.AddHangfire(config =>
+                    config.SetDataCompatibilityLevel(CompatibilityLevel.Version_170)
+                      .UseSimpleAssemblyNameTypeSerializer()
+                      .UseRecommendedSerializerSettings()
+                      .UsePostgreSqlStorage(
+                        options => options.UseNpgsqlConnection(builder.Configuration.GetConnectionString("DefaultConnection")),
+                        new PostgreSqlStorageOptions
+                        {
+                            SchemaName = "hangfire"
+                        }
+                ));
+
+            builder.Services.AddHangfireServer(options =>
+            {
+                options.ServerName = builder.Configuration["Hangfire:ServerName"] ?? "default-server";
+            });
+
+#if RELEASE
+            builder.WebHost.UseUrls("http://0.0.0.0:5000");
+#endif
 
             var app = builder.Build();
 
             // Configure the HTTP request pipeline.
-
             app.UseHttpsRedirection();
 
             app.UseAuthorization();
 
-
             app.MapControllers();
+
+            // Hangfire Dashboard (optional - remove or secure in prod)
+            app.UseHangfireDashboard();
 
             app.Run();
         }
