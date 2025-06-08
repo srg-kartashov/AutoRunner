@@ -1,4 +1,5 @@
 using Hangfire;
+using Hangfire.Dashboard;
 using Hangfire.PostgreSql;
 
 namespace AutoRunner
@@ -44,9 +45,19 @@ namespace AutoRunner
             app.MapControllers();
 
             // Hangfire Dashboard (optional - remove or secure in prod)
-            app.UseHangfireDashboard();
+            app.UseHangfireDashboard(options: new DashboardOptions
+            {
+                Authorization = new[] { new AllowAllDashboardAuthorizationFilter() }
+            });
 
             app.Run();
+        }
+    }
+    public class AllowAllDashboardAuthorizationFilter : IDashboardAuthorizationFilter
+    {
+        public bool Authorize(DashboardContext context)
+        {
+            return true; 
         }
     }
 }
