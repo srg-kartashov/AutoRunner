@@ -10,7 +10,9 @@ namespace AutoRunner
 
             builder.Services.AddControllers();
 
-            builder.WebHost.UseUrls("http://0.0.0.0:5000");
+            #if RELEASE
+                builder.WebHost.UseUrls("http://0.0.0.0:5000");
+            #endif
 
             var app = builder.Build();
 
