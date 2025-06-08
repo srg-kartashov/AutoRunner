@@ -1,6 +1,8 @@
 name: Build & Deploy to Hetzner (Docker only)
 
 on:
+  push:
+    branches: [ "master" ]
   workflow_dispatch:
 jobs:
   deploy:
