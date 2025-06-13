@@ -1,5 +1,9 @@
+using AutoRunner.Jobs;
+
 using Hangfire;
-using Hangfire.Dashboard.BasicAuthorization;
+using Hangfire.Console;
+using Hangfire.Console.Extensions;
+using Hangfire.MissionControl;
 using Hangfire.PostgreSql;
 
 namespace AutoRunner
@@ -24,7 +28,14 @@ namespace AutoRunner
                         {
                             SchemaName = "hangfire"
                         }
-                ));
+                ).UseConsole()
+            .UseMissionControl(new MissionControlOptions()
+            {
+                RequireConfirmation = false,    // Отключение подтверждения для запуска задач
+                HideCodeSnippet = false         // Отображение кода задачи
+            },
+            typeof(SteamGiftsJoinJob).Assembly)
+            );
 
             builder.Services.AddHangfireServer(options =>
             {
@@ -34,6 +45,8 @@ namespace AutoRunner
 #if RELEASE
             builder.WebHost.UseUrls("http://0.0.0.0:5000");
 #endif
+
+            builder.Services.AddHangfireConsoleExtensions();
 
             var app = builder.Build();
 
