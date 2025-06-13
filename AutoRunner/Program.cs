@@ -17,7 +17,9 @@ namespace AutoRunner
             // Add services to the container.
             builder.Services.AddControllers();
 
-             
+
+            _ = typeof(SteamGiftsJoinJob);
+
             builder.Services.AddHangfire(config =>
                     config.SetDataCompatibilityLevel(CompatibilityLevel.Version_170)
                       .UseSimpleAssemblyNameTypeSerializer()
