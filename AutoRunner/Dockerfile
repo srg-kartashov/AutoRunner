@@ -24,7 +24,7 @@ FROM build AS publish
 ARG BUILD_CONFIGURATION=Release
 
 # Публикуем (релизная сборка без app host)
-RUN dotnet publish "./AutoRunner.csproj" -c $BUILD_CONFIGURATION -o /app/publish /p:UseAppHost=false
+RUN dotnet publish "./AutoRunner.csproj" -c $BUILD_CONFIGURATION -o /app/publish /p:UseAppHost=false /p:PublishTrimmed=false
 
 FROM base AS final
 WORKDIR /app
