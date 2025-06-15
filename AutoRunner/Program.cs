@@ -5,6 +5,7 @@ using Hangfire.Console;
 using Hangfire.Console.Extensions;
 using Hangfire.MissionControl;
 using Hangfire.PostgreSql;
+using Hangfire.RecurringJobExtensions;
 
 namespace AutoRunner
 {
@@ -17,13 +18,11 @@ namespace AutoRunner
             // Add services to the container.
             builder.Services.AddControllers();
 
-
-            _ = typeof(SteamGiftsJoinJob);
-
             builder.Services.AddHangfire(config =>
                     config.SetDataCompatibilityLevel(CompatibilityLevel.Version_170)
                       .UseSimpleAssemblyNameTypeSerializer()
                       .UseRecommendedSerializerSettings()
+                      .UseRecurringJob(typeof(SteamGiftsJoinJob))
                       .UsePostgreSqlStorage(
                         options => options.UseNpgsqlConnection(builder.Configuration.GetConnectionString("DefaultConnection")),
                         new PostgreSqlStorageOptions
