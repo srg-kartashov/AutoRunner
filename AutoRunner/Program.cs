@@ -33,7 +33,7 @@ namespace AutoRunner
                         }
                 ).UseConsole()
             .UseMissionControl(new MissionControlOptions()
-            {
+            { 
                 RequireConfirmation = false,    // Отключение подтверждения для запуска задач
                 HideCodeSnippet = false         // Отображение кода задачи
             },
