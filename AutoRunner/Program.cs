@@ -3,6 +3,7 @@ using AutoRunner.Jobs;
 using Hangfire;
 using Hangfire.Console;
 using Hangfire.Console.Extensions;
+using Hangfire.Dashboard.BasicAuthorization;
 using Hangfire.MissionControl;
 using Hangfire.PostgreSql;
 using Hangfire.RecurringJobExtensions;
