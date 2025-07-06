@@ -90,6 +90,9 @@ namespace AutoRunner
             });
 #endif
 
+            Console.WriteLine("Running version: 2025-07-06");
+
+
             app.Run();
         }
     }
