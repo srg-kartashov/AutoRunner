@@ -31,10 +31,6 @@ jobs:
             # папка, где уже есть клон репозитория
             cd /opt/autorunner
 
-            echo "Pull latest changes..."
-            git fetch origin master
-            git reset --hard origin/master
-
             echo "Stopping and removing old container (if any)..."
             docker stop autorunner || true
             docker rm autorunner || true
