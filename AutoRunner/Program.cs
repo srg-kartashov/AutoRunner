@@ -37,7 +37,7 @@ namespace AutoRunner
             },
             typeof(SteamGiftsJoinJob).Assembly)
             );
-
+             
             builder.Services.AddHangfireServer(options =>
             {
                 options.ServerName = builder.Configuration["Hangfire:ServerName"] ?? "default-server";
