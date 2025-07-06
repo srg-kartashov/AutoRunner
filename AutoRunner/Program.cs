@@ -19,7 +19,8 @@ namespace AutoRunner
             // Add services to the container.
             builder.Services.AddControllers();
 
-            builder.Services.AddTransient<SteamGiftsJoinJob>();
+            var connStr = builder.Configuration.GetConnectionString("DefaultConnection");
+            Console.WriteLine($"Conn string: {connStr}");
 
             builder.Services.AddHangfire(config =>
                     config.SetDataCompatibilityLevel(CompatibilityLevel.Version_170)
