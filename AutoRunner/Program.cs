@@ -26,14 +26,14 @@ namespace AutoRunner
                     config.SetDataCompatibilityLevel(CompatibilityLevel.Version_170)
                       .UseSimpleAssemblyNameTypeSerializer()
                       .UseRecommendedSerializerSettings()
-                      .UseRecurringJob(typeof(SteamGiftsJoinJob))
                       .UsePostgreSqlStorage(
                         options => options.UseNpgsqlConnection(builder.Configuration.GetConnectionString("DefaultConnection")),
                         new PostgreSqlStorageOptions
                         {
                             SchemaName = "hangfire"
-                        }
-                ).UseConsole()
+                        })
+                      .UseRecurringJob(typeof(SteamGiftsJoinJob))
+                      .UseConsole()
             .UseMissionControl(new MissionControlOptions()
             { 
                 RequireConfirmation = false,    // Отключение подтверждения для запуска задач
