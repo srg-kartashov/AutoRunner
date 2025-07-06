@@ -15,7 +15,7 @@ namespace AutoRunner.Jobs
         }
 
         [Mission(Name = "Join SteamGifts Giveaways", Description = "Automatically joins available SteamGifts giveaways")]
-        [RecurringJob("*/5 * * * *")]
+        //[RecurringJob("*/5 * * * *")]
         [JobDisplayName("SteamGifts: Auto Join Giveaways")]
         public async Task JoinGiveaways()
         {
