@@ -41,6 +41,8 @@ jobs:
 
             cd AutoRunner
 
+            docker image prune -f
+
             echo "Building Docker image..."
             docker build --no-cache -t autorunner:latest .
 
