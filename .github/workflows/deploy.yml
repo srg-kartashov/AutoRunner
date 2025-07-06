@@ -42,7 +42,7 @@ jobs:
             cd AutoRunner
 
             echo "Building Docker image..."
-            docker build -t autorunner:latest .
+            docker build --no-cache -t autorunner:latest .
 
             echo "Starting new container..."
             docker run -d \
