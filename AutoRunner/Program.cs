@@ -67,7 +67,7 @@ namespace AutoRunner
 #else
             app.UseHangfireDashboard(options: new DashboardOptions()
             {
-                DashboardTitle = "AutoRunner",
+                DashboardTitle = "AutoRunner1",
                 FaviconPath = "/favicon.ico",
                 DarkModeEnabled = true,
                 Authorization =
@@ -89,9 +89,6 @@ namespace AutoRunner
                 ]
             });
 #endif
-
-            Console.WriteLine("Running version: 2025-07-06");
-
 
             app.Run();
         }
