@@ -6,12 +6,12 @@
 		<ImplicitUsings>enable</ImplicitUsings>
 		<UserSecretsId>ddd7484a-287d-4e6e-8e48-7a5eadad677d</UserSecretsId>
 		<DockerDefaultTargetOS>Linux</DockerDefaultTargetOS>
+		<PublishTrimmed>false</PublishTrimmed>
 	</PropertyGroup>
 
 	<ItemGroup>
 		<None Remove="AutoRunner.http" />
 	</ItemGroup>
-
 	<ItemGroup>
 		<Content Include="AutoRunner.http">
 			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
