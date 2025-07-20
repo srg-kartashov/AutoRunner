@@ -31,8 +31,8 @@ namespace SteamGifts.Client
         {
             var page = new SteamGiftPage(_driver);
             page.GoToPage(1);
-
-            if(page.IsAuthorized() == false)
+            Thread.Sleep(1000);
+            if (page.IsAuthorized() == false)
             {
                 _logger?.LogWarning("User is not authorized on SteamGifts");
                 throw new UnauthorizedAccessException("User is not authorized on SteamGifts");
@@ -60,6 +60,7 @@ namespace SteamGifts.Client
             {
                 _logger?.LogDebug("Loading giveaways from page {Page}", currentPage);
                 page.GoToPage(currentPage++);
+                Thread.Sleep(1000);
                 var giveaways = page.GetGiveaways();
                 var giveawaysData = giveaways.Select(g => new Giveaway
                 {
@@ -87,6 +88,7 @@ namespace SteamGifts.Client
             _logger?.LogDebug("Trying to join giveaway: {Url}", giveawayUrl);
 
             page.GoToPage();
+            Thread.Sleep(1000);
             bool result = page.PerformEnter();
 
             _logger?.LogInformation("Joined giveaway {Url}: {Result}", giveawayUrl, result);
