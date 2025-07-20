@@ -61,6 +61,7 @@ namespace SteamGifts.Client
                 _logger?.LogDebug("Loading giveaways from page {Page}", currentPage);
                 page.GoToPage(currentPage++);
                 Thread.Sleep(DefaultWaitTime);
+                _logger?.LogDebug("Loaded giveaways from page {Page}", currentPage);
                 var giveaways = page.GetGiveaways();
                 Thread.Sleep(DefaultWaitTime);
                 var giveawaysData = giveaways.Select(g => new Giveaway

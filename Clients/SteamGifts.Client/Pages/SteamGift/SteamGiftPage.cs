@@ -46,6 +46,12 @@ namespace SteamGifts.Client.Pages.SteamGift
             }
         }
 
+        public bool IsGiveawaysAvailable()
+        {
+            var giveaways = Driver.FindElements(Giveaways);
+            return giveaways != null && giveaways.Count > 0;
+        }
+
         public int GetLevel()
         {
             var levelElement = Driver.FindElements(Level).LastOrDefault();
@@ -98,10 +104,10 @@ namespace SteamGifts.Client.Pages.SteamGift
 
         public void GoToPage(int pageNumber)
         {
-            WebDriverWait wait = new WebDriverWait(Driver, TimeSpan.FromSeconds(10));
+            WebDriverWait wait = new WebDriverWait(Driver, TimeSpan.FromMinutes(1));
             string url = pageNumber == 1 ? baseUrl : $"{baseUrl}giveaways/search?page={pageNumber}";
             Driver.Navigate().GoToUrl(url);
-            //wait.Until(e => IsUserNameVisible());
+            wait.Until(e => IsGiveawaysAvailable());
         }
 
         public bool IsAuthorized()
