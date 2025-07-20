@@ -16,6 +16,8 @@ namespace SteamGifts.Client.Pages.SteamGift
         private By Pagination => By.CssSelector("div.pagination__navigation span");
         private By Points => By.CssSelector("a[href^='/account'] span.nav__points");
         private By UserName => By.CssSelector("header a[href^='/user']");
+        private By ConsentButton => By.CssSelector("div.fc-footer-buttons-container button[aria-label='Consent']");
+
 
         public SteamGiftPage(IWebDriver driver) : base(driver)
         {
@@ -121,6 +123,21 @@ namespace SteamGifts.Client.Pages.SteamGift
             var pagination = Driver.FindElements(Pagination).LastOrDefault();
             var nextPageExists = pagination?.Text == "Next";
             return nextPageExists;
+        }
+
+        public bool IsConsentButtonVisible()
+        {
+            return Driver.FindElements(ConsentButton).FirstOrDefault() is not null;
+        }
+
+        public void ClickConsentButtonIfExists()
+        {
+            var button = Driver.FindElements(ConsentButton).FirstOrDefault();
+            if (button is not null)
+            {
+                button.Click();
+                Thread.Sleep(1000);
+            }
         }
     }
 }
