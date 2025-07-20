@@ -14,17 +14,17 @@ WORKDIR /src
 COPY . .
 
 # Восстанавливаем зависимости
-RUN dotnet restore "AutoRunner.csproj"
+RUN dotnet restore "AutoRunner/AutoRunner.csproj"
 
 # Собираем проект
-RUN dotnet build "AutoRunner.csproj" -c $BUILD_CONFIGURATION -o /app/build
+RUN dotnet build "AutoRunner/AutoRunner.csproj" -c $BUILD_CONFIGURATION -o /app/build
 
 FROM build AS publish
 ARG BUILD_CONFIGURATION=Release
 
 # Публикуем (релизная сборка без app host)
 FROM build AS publish
-RUN dotnet publish "AutoRunner.csproj" -c $BUILD_CONFIGURATION -o /app/publish /p:UseAppHost=false /p:PublishTrimmed=false
+RUN dotnet publish "AutoRunner/AutoRunner.csproj" -c $BUILD_CONFIGURATION -o /app/publish /p:UseAppHost=false /p:PublishTrimmed=false
 
 FROM base AS final
 WORKDIR /app
