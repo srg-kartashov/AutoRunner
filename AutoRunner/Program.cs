@@ -49,6 +49,7 @@ namespace AutoRunner
             builder.Services.AddHangfireServer(options =>
             {
                 options.ServerName = builder.Configuration["Hangfire:ServerName"] ?? "default-server";
+                options.WorkerCount = 1; //  оличество воркеров, обрабатывающих задачи
             });
 
             builder.Services.AddMemoryCache();
