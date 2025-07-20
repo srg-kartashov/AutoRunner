@@ -4,6 +4,8 @@ WORKDIR /app
 EXPOSE 8080
 EXPOSE 8081
 
+USER root
+
 # Install Chrome and chromedriver
 RUN apt-get update && apt-get install -y \
     wget \
