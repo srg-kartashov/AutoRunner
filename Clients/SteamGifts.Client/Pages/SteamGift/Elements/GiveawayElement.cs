@@ -49,10 +49,17 @@ namespace SteamGifts.Client.Pages.SteamGift.Elements
 
         public int GetPoints()
         {
-            var pointElement = WebElement.FindElements(PointsSelector).First(e => e.Text.EndsWith("P)")).Text;
-            var pointText = pointElement.Trim('(', ')').TrimEnd('P');
-            var point = int.Parse(pointText);
-            return point;
+            try
+            {
+                var pointElement = WebElement.FindElements(PointsSelector).First(e => e.Text.EndsWith("P)")).Text;
+                var pointText = pointElement.Trim('(', ')').TrimEnd('P');
+                var point = int.Parse(pointText);
+                return point;
+            }
+            catch (Exception ex)
+            {
+                return int.MaxValue; // If parsing fails, return a high value to indicate an error
+            }
         }
 
         public string GetApplicationId()
