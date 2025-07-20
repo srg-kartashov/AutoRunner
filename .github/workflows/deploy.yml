@@ -39,7 +39,7 @@ jobs:
             docker image prune -f
 
             echo "Building Docker image..."
-            docker build --no-cache -t autorunner:latest .
+            docker build --no-cache -f AutoRunner/Dockerfile -t autorunner:latest .
 
             echo "Starting new container..."
             docker run -d \
