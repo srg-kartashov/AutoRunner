@@ -41,4 +41,15 @@
 	<ItemGroup>
 		<Folder Include="Controllers\" />
 	</ItemGroup>
+
+	<ItemGroup>
+	  <ProjectReference Include="..\Clients\SteamGifts.Client\SteamGifts.Client.csproj" />
+	  <ProjectReference Include="..\Clients\SteamPowered.Client\SteamPowered.Client.csproj" />
+	</ItemGroup>
+
+	<ItemGroup>
+	  <Content Update="appsettings.json">
+	    <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+	  </Content>
+	</ItemGroup>
 </Project>

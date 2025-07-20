@@ -7,20 +7,20 @@ using SteamPowered.Client.Models;
 
 namespace SteamPowered.Client
 {
-    public class SteamPoweredClient
+    public class SteamPoweredClient : ISteamPoweredClient
     {
         private const string BaseUrl = "https://store.steampowered.com";
         private readonly HttpClient _httpClient;
-        private readonly ILogger<SteamPoweredClient>? _logger;
+        private readonly ILogger? _logger;
 
-        public SteamPoweredClient(HttpClient httpClient, ILogger<SteamPoweredClient>? logger = null)
+        public SteamPoweredClient(HttpClient httpClient, ILogger? logger = null)
         {
             _httpClient = httpClient;
             _httpClient.BaseAddress ??= new Uri(BaseUrl);
             _logger = logger;
         }
 
-        public async Task<AppReviews?> GetAppReviewsAsync(int applicationId)
+        public async Task<AppReviews?> GetAppReviewsAsync(string applicationId)
         {
             try
             {
@@ -34,13 +34,14 @@ namespace SteamPowered.Client
                     return null;
 
                 var summary = dto.QuerySummary;
+                var rating = summary.TotalReviews > 0
+                    ? summary.TotalPositive / (double)summary.TotalReviews * 100.0
+                    : 0;
 
                 return new AppReviews
                 {
                     TotalReviews = summary.TotalReviews,
-                    Rating = summary.TotalReviews > 0
-                           ? summary.TotalPositive / (double)summary.TotalReviews * 100.0
-                           : 0
+                    Rating = rating
                 };
             }
             catch (Exception ex)

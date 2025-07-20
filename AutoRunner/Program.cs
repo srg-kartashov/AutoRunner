@@ -1,4 +1,6 @@
+using AutoRunner.Factories;
 using AutoRunner.Jobs;
+using AutoRunner.Services;
 
 using Hangfire;
 using Hangfire.Console;
@@ -7,6 +9,8 @@ using Hangfire.Dashboard.BasicAuthorization;
 using Hangfire.MissionControl;
 using Hangfire.PostgreSql;
 using Hangfire.RecurringJobExtensions;
+
+using SteamPowered.Client;
 
 namespace AutoRunner
 {
@@ -35,17 +39,22 @@ namespace AutoRunner
                       //.UseRecurringJob(typeof(SteamGiftsJoinJob))
                       .UseConsole()
             .UseMissionControl(new MissionControlOptions()
-            { 
+            {
                 RequireConfirmation = false,    // Отключение подтверждения для запуска задач
                 HideCodeSnippet = false         // Отображение кода задачи
             },
             typeof(SteamGiftsJoinJob).Assembly)
             );
-             
+
             builder.Services.AddHangfireServer(options =>
             {
                 options.ServerName = builder.Configuration["Hangfire:ServerName"] ?? "default-server";
             });
+
+            builder.Services.AddMemoryCache();
+            builder.Services.AddHttpClient<ISteamPoweredClient, SteamPoweredCachedService>();
+
+            builder.Services.AddSingleton<ISeleniumDriverFactory, SeleniumDriverFactory>();
 
 #if RELEASE
             builder.WebHost.UseUrls("http://0.0.0.0:5000");

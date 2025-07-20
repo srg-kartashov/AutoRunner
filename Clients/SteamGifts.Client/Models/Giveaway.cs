@@ -2,12 +2,13 @@
 {
     public class Giveaway
     {
-        public required string GameName { get; set; }
-        public required string GiveawayUrl { get; set; }
-        public required string SteamUrl { get; set; }
-        public required int Points { get; set; }
-        public required int Level { get; set; }
-        public required string ApplicationId { get; set; }
-        public required bool Joined { get; set; }
+        public string GameName { get; set; } = string.Empty;
+        public string GiveawayUrl { get; set; } = string.Empty;
+        public string SteamUrl { get; set; } = string.Empty;
+        public int Points { get; set; }
+        public int Level { get; set; }
+        public string ApplicationId { get; set; } = string.Empty;
+        public bool Joined { get; set; }
+        public bool IsCollection { get; internal set; }
     }
 }

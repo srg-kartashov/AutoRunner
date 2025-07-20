@@ -1,6 +1,4 @@
-﻿using System.Text;
-
-namespace SteamGifts.Client.Utils
+﻿namespace SteamGifts.Client.Utils
 {
     internal class RandomWaiter
     {
@@ -22,20 +20,6 @@ namespace SteamGifts.Client.Utils
         public void WaitSeconds(int secondsFrom, int secondsTo) => WaitMilliseconds(secondsFrom * 1000, secondsTo * 1000);
 
         public void WaitSeconds(int seconds) => WaitSeconds(0, seconds);
-
-        private string GetMessageForLogger(int milliseconds)
-        {
-            TimeSpan timeSpan = TimeSpan.FromMilliseconds(milliseconds);
-            StringBuilder stringBuilder = new StringBuilder();
-            stringBuilder.Append("Wait for ");
-            if (timeSpan.Hours != 0)
-                stringBuilder.Append($"{timeSpan.Hours} hours, ");
-            if (timeSpan.Minutes != 0)
-                stringBuilder.Append($"{timeSpan.Minutes} minutes, ");
-            if (timeSpan.Seconds != 0)
-                stringBuilder.Append($"{timeSpan.Seconds} seconds");
-            return stringBuilder.ToString();
-        }
 
         private void WaitMilliseconds(int from, int to)
         {

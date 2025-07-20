@@ -10,24 +10,44 @@ namespace SteamGifts.Client
     public class SteamGiftsClient
     {
         private readonly IWebDriver _driver;
-        private readonly ILogger<SteamGiftsClient>? _logger;
+        private readonly ILogger? _logger;
 
-        public SteamGiftsClient(IWebDriver driver, ILogger<SteamGiftsClient>? logger = null)
+
+        public SteamGiftsClient(IWebDriver driver, ILogger? logger = null)
         {
             _driver = driver;
             _logger = logger;
+        }
+
+        public void InjectCookies(IEnumerable<Cookie> cookies)
+        {
+            _driver.Navigate().GoToUrl("https://www.steamgifts.com");
+            foreach (var cookie in cookies)
+                _driver.Manage().Cookies.AddCookie(cookie);
+            _driver.Navigate().Refresh();
         }
 
         public UserInfo GetUserInfo()
         {
             var page = new SteamGiftPage(_driver);
             page.GoToPage(1);
+
+            if(page.IsAuthorized() == false)
+            {
+                _logger?.LogWarning("User is not authorized on SteamGifts");
+                throw new UnauthorizedAccessException("User is not authorized on SteamGifts");
+            }
+
             var userInfo = new UserInfo
             {
                 Username = page.GetUserName(),
                 Points = page.GetPoints(),
                 Level = page.GetLevel()
             };
+
+            _logger?.LogInformation("User info: {Username}, Level {Level}, Points {Points}",
+                userInfo.Username, userInfo.Level, userInfo.Points);
+
             return userInfo;
         }
 
@@ -38,7 +58,7 @@ namespace SteamGifts.Client
             int currentPage = 1;
             do
             {
-                _logger?.LogDebug("Loading page {PageNumber}", currentPage);
+                _logger?.LogDebug("Loading giveaways from page {Page}", currentPage);
                 page.GoToPage(currentPage++);
                 var giveaways = page.GetGiveaways();
                 var giveawaysData = giveaways.Select(g => new Giveaway
@@ -50,21 +70,28 @@ namespace SteamGifts.Client
                     Level = g.GetLevel(),
                     ApplicationId = g.GetApplicationId(),
                     Joined = g.HasAlreadyJoined(),
+                    IsCollection = g.IsCollection()
                 });
                 result.AddRange(giveawaysData);
             }
             while (page.IsNextPageAvailable());
 
-            _logger?.LogInformation("Collected {Count} giveaways", result.Count);
+            _logger?.LogInformation("Collected total {Count} giveaways", result.Count);
             return result;
         }
 
         public bool JoinGiveaway(string giveawayUrl)
         {
             var page = new GiveawayPage(_driver, giveawayUrl);
+
+            _logger?.LogDebug("Trying to join giveaway: {Url}", giveawayUrl);
+
             page.GoToPage();
-            var success = page.PerformEnter();
-            return success;
+            bool result = page.PerformEnter();
+
+            _logger?.LogInformation("Joined giveaway {Url}: {Result}", giveawayUrl, result);
+
+            return result;
         }
     }
 }
