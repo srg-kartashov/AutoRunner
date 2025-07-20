@@ -85,7 +85,7 @@ namespace SteamGifts.Client.Pages.SteamGift.Elements
         public int GetLevel()
         {
             var levelElement = WebElement.FindElements(LevelSelector).FirstOrDefault();
-            if (levelElement != null)
+            if (!string.IsNullOrEmpty(levelElement?.Text))
             {
                 var levelText = levelElement.Text;
                 Match match = Regex.Match(levelText, @"\d+");
