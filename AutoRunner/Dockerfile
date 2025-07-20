@@ -1,16 +1,12 @@
 ﻿FROM mcr.microsoft.com/dotnet/aspnet:8.0 AS base
-USER $APP_UID
 WORKDIR /app
 EXPOSE 8080
 EXPOSE 8081
-
-USER root
 
 FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
 ARG BUILD_CONFIGURATION=Release
 WORKDIR /src
 
-# Копируем только проектный файл (из текущей папки контекста)
 COPY . .
 
 # Восстанавливаем зависимости
@@ -23,7 +19,6 @@ FROM build AS publish
 ARG BUILD_CONFIGURATION=Release
 
 # Публикуем (релизная сборка без app host)
-FROM build AS publish
 RUN dotnet publish "AutoRunner/AutoRunner.csproj" -c $BUILD_CONFIGURATION -o /app/publish /p:UseAppHost=false /p:PublishTrimmed=false
 
 FROM base AS final
