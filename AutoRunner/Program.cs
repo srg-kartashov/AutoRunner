@@ -78,7 +78,7 @@ namespace AutoRunner
 #else
             app.UseHangfireDashboard(options: new DashboardOptions()
             {
-                DashboardTitle = "AutoRunner1",
+                DashboardTitle = "AutoRunner",
                 FaviconPath = "/favicon.ico",
                 DarkModeEnabled = true,
                 Authorization =
