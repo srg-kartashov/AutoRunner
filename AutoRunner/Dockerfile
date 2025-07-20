@@ -9,8 +9,9 @@ FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
 ARG BUILD_CONFIGURATION=Release
 WORKDIR /src
 
-COPY ../Clients ./Clients
-COPY . .
+COPY ./Clients ./Clients
+COPY AutoRunner ./AutoRunner
+WORKDIR /src/AutoRunner
 
 # Восстанавливаем зависимости
 RUN dotnet restore "AutoRunner/AutoRunner.csproj"
