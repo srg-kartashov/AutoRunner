@@ -14,7 +14,6 @@ WORKDIR /src
 COPY . .
 
 # Восстанавливаем зависимости
-WORKDIR /src/AutoRunner
 RUN dotnet restore "AutoRunner.csproj"
 
 # Собираем проект
