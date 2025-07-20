@@ -95,7 +95,7 @@ namespace SteamGifts.Client.Pages.SteamGift.Elements
                 }
                 else
                 {
-                    throw new FormatException("Error parsing Level. Invalid string format.");
+                    throw new FormatException("Error parsing Level. Invalid string format." + levelText);
                 }
             }
             else
