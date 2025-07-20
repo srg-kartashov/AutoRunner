@@ -4,6 +4,10 @@ WORKDIR /app
 EXPOSE 8080
 EXPOSE 8081
 
+RUN apt-get update && \
+    apt-get install -y chromium chromium-driver && \
+    rm -rf /var/lib/apt/lists/*
+
 # Образ для сборки
 FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
 ARG BUILD_CONFIGURATION=Release
@@ -11,6 +15,7 @@ WORKDIR /src
 
 # Копируем весь исходный код
 COPY . .
+
 
 # Восстанавливаем зависимости
 RUN dotnet restore "AutoRunner/AutoRunner.csproj"
