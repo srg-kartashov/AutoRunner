@@ -72,7 +72,6 @@ namespace SteamGifts.Client
                     Thread.Sleep(DefaultWaitTime);
                 }
 
-                _logger?.LogDebug("Loaded giveaways from page {Page}", currentPage);
                 var giveaways = page.GetGiveaways();
                 Thread.Sleep(DefaultWaitTime);
                 var giveawaysData = giveaways.Select(g => new Giveaway
