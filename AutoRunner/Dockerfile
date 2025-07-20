@@ -1,14 +1,21 @@
-﻿FROM mcr.microsoft.com/dotnet/aspnet:8.0 AS base
+﻿# Базовый образ для рантайма
+FROM mcr.microsoft.com/dotnet/aspnet:8.0 AS base
 WORKDIR /app
-EXPOSE 5000
+EXPOSE 8080
+EXPOSE 8081
 
-# Сборка и публикация .NET-приложения
+RUN apt-get update && \
+    apt-get install -y chromium chromium-driver && \
+    rm -rf /var/lib/apt/lists/*
+
+# Образ для сборки
 FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
 ARG BUILD_CONFIGURATION=Release
 WORKDIR /src
 
-# Копируем исходники
+# Копируем весь исходный код
 COPY . .
+
 
 # Восстанавливаем зависимости
 RUN dotnet restore "AutoRunner/AutoRunner.csproj"
@@ -18,21 +25,12 @@ RUN dotnet build "AutoRunner/AutoRunner.csproj" -c $BUILD_CONFIGURATION -o /app/
 
 # Публикуем проект
 FROM build AS publish
+ARG BUILD_CONFIGURATION=Release
 RUN dotnet publish "AutoRunner/AutoRunner.csproj" -c $BUILD_CONFIGURATION -o /app/publish /p:UseAppHost=false /p:PublishTrimmed=false
 
-# Финальный образ — с готовым Chrome от Selenium
-FROM selenium/standalone-chrome
-USER root
+# Финальный образ
+FROM base AS final
 WORKDIR /app
-
-# Копируем опубликованное приложение
 COPY --from=publish /app/publish .
 
-# Меняем владельца (если нужно запускать от seluser)
-RUN chown -R seluser:seluser /app
-
-# Переключаемся на безопасного пользователя Selenium
-USER seluser
-
-# Запуск приложения
 ENTRYPOINT ["dotnet", "AutoRunner.dll"]
