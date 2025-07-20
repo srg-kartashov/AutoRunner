@@ -11,13 +11,10 @@ ARG BUILD_CONFIGURATION=Release
 WORKDIR /src
 
 # Копируем только проектный файл (из текущей папки контекста)
-COPY ["AutoRunner.csproj", "./"]
+COPY . .
 
 # Восстанавливаем зависимости
 RUN dotnet restore "./AutoRunner.csproj"
-
-# Копируем весь исходный код (из текущей папки)
-COPY . .
 
 # Собираем проект
 RUN dotnet build "./AutoRunner.csproj" -c $BUILD_CONFIGURATION -o /app/build
