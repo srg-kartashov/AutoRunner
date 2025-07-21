@@ -15,6 +15,16 @@ using TelegramNotifier.Client;
 
 namespace AutoRunner.Jobs
 {
+    public class GiveawayStats
+    {
+        public int Total { get; set; }
+        public int Joined { get; set; }
+        public int SkippedCollections { get; set; }
+        public int AlreadyJoined { get; set; }
+        public int InsufficientPoints { get; set; }
+        public int FailedJoins { get; set; }
+    }
+
     [MissionLauncher(CategoryName = "SteamGift")]
     public class SteamGiftsJoinJob
     {
@@ -42,7 +52,8 @@ namespace AutoRunner.Jobs
         [JobDisplayName("SteamGifts: Auto Join Giveaways")]
         public async Task JoinGiveaways(IJobCancellationToken cancellationToken)
         {
-            await _telegramNotifier.SendTextAsync("Starting SteamGifts giveaway join job...");
+            await _telegramNotifier.SendTextAsync("🟢 Starting SteamGifts giveaway join job...");
+            var stats = new GiveawayStats();
             using var driver = _seleniumDriverFactory.CreateDriver();
 
 
@@ -52,6 +63,7 @@ namespace AutoRunner.Jobs
                 steamGiftsClient.InjectCookies([new Cookie("PHPSESSID", _token, "www.steamgifts.com", "/", null)]);
                 var user = steamGiftsClient.GetUserInfo();
                 var giveaways = steamGiftsClient.GetAllGiveaways().ToList();
+                stats.Total = giveaways.Count;
                 var currentPoints = user.Points;
 
                 foreach (var giveaway in giveaways)
@@ -62,18 +74,21 @@ namespace AutoRunner.Jobs
 
                     if (giveaway.Joined)
                     {
+                        stats.AlreadyJoined++;
                         _logger.LogInformation("🔒 Already joined giveaway: {GameName}", giveaway.GameName);
                         continue;
                     }
 
                     if (giveaway.IsCollection)
                     {
+                        stats.SkippedCollections++;
                         _logger.LogInformation("🔁 Skipped collection giveaway: {GameName}", giveaway.GameName);
                         continue;
                     }
 
                     if (currentPoints < giveaway.Points)
                     {
+                        stats.InsufficientPoints++;
                         _logger.LogInformation("⛔ Not enough points to join: {GameName} (Required: {Points}, Available: {CurrentPoints})",
                             giveaway.GameName, giveaway.Points, currentPoints);
                         continue;
@@ -94,46 +109,64 @@ namespace AutoRunner.Jobs
                     var joinResult = steamGiftsClient.JoinGiveaway(giveaway.GiveawayUrl);
                     if (joinResult)
                     {
+                        stats.Joined++;
                         _logger.LogInformation("✅ Successfully joined giveaway: {GameName} (Points: {Points})", giveaway.GameName, giveaway.Points);
                         currentPoints -= giveaway.Points;
                     }
                     else
                     {
+                        stats.FailedJoins++;
                         _logger.LogWarning("❌ Failed to join giveaway: {GameName}", giveaway.GameName);
                     }
 
                     await Task.Delay(2000);
                 }
+                await SendSummaryAsync(stats, currentPoints);
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Unhandled exception in SteamGifts job");
-
-                try
-                {
-                    await _telegramNotifier.SendTextAsync($"❌ Exception in SteamGifts job:\n```\n{ex.Message}\n```");
-
-                    // Скриншот
-                    if (driver is ITakesScreenshot screenshotTaker)
-                    {
-                        var screenshot = screenshotTaker.GetScreenshot();
-                        var imageBytes = screenshot.AsByteArray;
-                        await _telegramNotifier.SendScreenshotAsync(imageBytes, "🖼️ Screenshot at exception");
-                    }
-
-                    // HTML страницы
-                    var html = driver.PageSource;
-                    var htmlBytes = Encoding.UTF8.GetBytes(html);
-                    using var htmlStream = new MemoryStream(htmlBytes);
-                    await _telegramNotifier.SendFileAsync(htmlStream, "page.html", "📄 Page HTML at exception");
-
-                }
-                catch (Exception notifyEx)
-                {
-                    _logger.LogError(notifyEx, "Failed to send error notification to Telegram");
-                }
-
+                await HandleErrorAsync(ex, driver);
                 throw;
+            }
+        }
+
+        private async Task SendSummaryAsync(GiveawayStats stats, int remainingPoints)
+        {
+            var sb = new StringBuilder();
+            sb.AppendLine("🎉 <b>SteamGifts Giveaway Join Summary</b>");
+            sb.AppendLine($"🧾 Total giveaways: <b>{stats.Total}</b>");
+            sb.AppendLine($"✅ Joined: <b>{stats.Joined}</b>");
+            sb.AppendLine($"🔁 Skipped collections: <b>{stats.SkippedCollections}</b>");
+            sb.AppendLine($"🔒 Already joined: <b>{stats.AlreadyJoined}</b>");
+            sb.AppendLine($"⛔ Not enough points: <b>{stats.InsufficientPoints}</b>");
+            sb.AppendLine($"❌ Failed to join: <b>{stats.FailedJoins}</b>");
+            sb.AppendLine($"🎯 Remaining points: <b>{remainingPoints}</b>");
+
+            await _telegramNotifier.SendTextAsync(sb.ToString());
+        }
+
+        private async Task HandleErrorAsync(Exception ex, IWebDriver driver)
+        {
+            _logger.LogError(ex, "Unhandled exception in SteamGifts job");
+
+            try
+            {
+                await _telegramNotifier.SendTextAsync($"❌ Exception in SteamGifts job:\n```\n{ex.Message}\n```");
+
+                if (driver is ITakesScreenshot screenshotTaker)
+                {
+                    var screenshot = screenshotTaker.GetScreenshot();
+                    await _telegramNotifier.SendScreenshotAsync(screenshot.AsByteArray, "🖼️ Screenshot at exception");
+                }
+
+                var html = driver.PageSource;
+                var htmlBytes = Encoding.UTF8.GetBytes(html);
+                using var htmlStream = new MemoryStream(htmlBytes);
+                await _telegramNotifier.SendFileAsync(htmlStream, "page.html", "📄 Page HTML at exception");
+            }
+            catch (Exception notifyEx)
+            {
+                _logger.LogError(notifyEx, "Failed to send error notification to Telegram");
             }
         }
     }

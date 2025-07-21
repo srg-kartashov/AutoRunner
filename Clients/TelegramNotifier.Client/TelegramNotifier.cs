@@ -34,7 +34,7 @@ namespace TelegramNotifier.Client
                 text: message,
                 messageThreadId: _messageThreadId,
                 disableNotification: disableNotification,
-                parseMode: ParseMode.Markdown);
+                parseMode: ParseMode.Html);
         }
 
         public async Task SendFileAsync(Stream fileStream, string fileName, string caption = "")
