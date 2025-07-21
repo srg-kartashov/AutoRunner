@@ -40,7 +40,7 @@ namespace AutoRunner.Jobs
         [Mission(Name = "Join SteamGifts Giveaways", Description = "Automatically joins available SteamGifts giveaways")]
         [AutomaticRetry(Attempts = 0)]
         [JobDisplayName("SteamGifts: Auto Join Giveaways")]
-        public async Task JoinGiveaways()
+        public async Task JoinGiveaways(IJobCancellationToken cancellationToken)
         {
             await _telegramNotifier.SendTextAsync("Starting SteamGifts giveaway join job...");
             using var driver = _seleniumDriverFactory.CreateDriver();
@@ -56,6 +56,7 @@ namespace AutoRunner.Jobs
 
                 foreach (var giveaway in giveaways)
                 {
+                    cancellationToken.ThrowIfCancellationRequested();
                     _logger.LogInformation("🎯 Processing giveaway: {GameName}, AppId: {AppId}, Required points: {Points}, Current points: {CurrentPoints}",
                         giveaway.GameName, giveaway.ApplicationId, giveaway.Points, currentPoints);
 
