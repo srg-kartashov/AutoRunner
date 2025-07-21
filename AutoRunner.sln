@@ -13,6 +13,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SteamGifts.Client", "Client
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AutoRunner.Console", "AutoRunner.Console\AutoRunner.Console.csproj", "{08B78B38-10D7-46BC-A264-2636E0B30A31}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TelegramNotifier.Client", "Clients\TelegramNotifier.Client\TelegramNotifier.Client.csproj", "{9480F9FA-B278-48A7-BE74-FD0B7EE1DACE}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -35,6 +37,10 @@ Global
 		{08B78B38-10D7-46BC-A264-2636E0B30A31}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{08B78B38-10D7-46BC-A264-2636E0B30A31}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{08B78B38-10D7-46BC-A264-2636E0B30A31}.Release|Any CPU.Build.0 = Release|Any CPU
+		{9480F9FA-B278-48A7-BE74-FD0B7EE1DACE}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{9480F9FA-B278-48A7-BE74-FD0B7EE1DACE}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{9480F9FA-B278-48A7-BE74-FD0B7EE1DACE}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{9480F9FA-B278-48A7-BE74-FD0B7EE1DACE}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -42,6 +48,7 @@ Global
 	GlobalSection(NestedProjects) = preSolution
 		{758489AE-9844-52F8-686C-675424F6352D} = {02EA681E-C7D8-13C7-8484-4AC65E1B71E8}
 		{249AB3B2-E880-4C37-BB54-AEDCBAFF5D0C} = {02EA681E-C7D8-13C7-8484-4AC65E1B71E8}
+		{9480F9FA-B278-48A7-BE74-FD0B7EE1DACE} = {02EA681E-C7D8-13C7-8484-4AC65E1B71E8}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {475DE2B6-37FA-4AED-A948-30E918C099C9}

@@ -12,6 +12,8 @@ using Hangfire.RecurringJobExtensions;
 
 using SteamPowered.Client;
 
+using TelegramNotifier.Client.Extensions;
+
 namespace AutoRunner
 {
     public class Program
@@ -51,6 +53,8 @@ namespace AutoRunner
                 options.ServerName = builder.Configuration["Hangfire:ServerName"] ?? "default-server";
                 options.WorkerCount = 1; //  оличество воркеров, обрабатывающих задачи
             });
+
+            builder.Services.AddTelegramNotifier(builder.Configuration);
 
             builder.Services.AddMemoryCache();
             builder.Services.AddHttpClient<ISteamPoweredClient, SteamPoweredCachedService>();

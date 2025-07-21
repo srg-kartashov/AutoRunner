@@ -45,6 +45,7 @@
 	<ItemGroup>
 	  <ProjectReference Include="..\Clients\SteamGifts.Client\SteamGifts.Client.csproj" />
 	  <ProjectReference Include="..\Clients\SteamPowered.Client\SteamPowered.Client.csproj" />
+	  <ProjectReference Include="..\Clients\TelegramNotifier.Client\TelegramNotifier.Client.csproj" />
 	</ItemGroup>
 
 	<ItemGroup>

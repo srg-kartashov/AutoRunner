@@ -60,7 +60,7 @@ namespace SteamGifts.Client
            
             do
             {
-                _logger?.LogDebug("Loading giveaways from page {Page}", currentPage);
+                _logger?.LogInformation("Loading giveaways from page {Page}", currentPage);
                 page.GoToPage(currentPage++);
 
                 Thread.Sleep(DefaultWaitTime);
