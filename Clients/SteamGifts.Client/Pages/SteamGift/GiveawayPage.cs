@@ -20,7 +20,7 @@ namespace SteamGifts.Client.Pages.SteamGift
 
         public void GoToPage()
         {
-            WebDriverWait wait = new WebDriverWait(Driver, TimeSpan.FromSeconds(20));
+            WebDriverWait wait = new WebDriverWait(Driver, TimeSpan.FromSeconds(30));
             Driver.Navigate().GoToUrl(Url);
             wait.Until(e => IsHideButtonVisible() || IsEnterButtonVisible());
         }
