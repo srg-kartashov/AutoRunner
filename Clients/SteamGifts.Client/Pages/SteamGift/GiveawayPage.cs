@@ -20,12 +20,14 @@ namespace SteamGifts.Client.Pages.SteamGift
 
         public void GoToPage()
         {
+            WebDriverWait wait = new WebDriverWait(Driver, TimeSpan.FromSeconds(20));
             Driver.Navigate().GoToUrl(Url);
+            wait.Until(e => IsHideButtonVisible() || IsEnterButtonVisible());
         }
 
         public bool PerformEnter()
         {
-            WebDriverWait wait = new WebDriverWait(Driver, TimeSpan.FromSeconds(10));
+            WebDriverWait wait = new WebDriverWait(Driver, TimeSpan.FromSeconds(20));
             RandomWaiter.WaitSeconds(1, 3);
             ClickEnterButton();
             wait.Until(e => IsEntered());
@@ -35,7 +37,7 @@ namespace SteamGifts.Client.Pages.SteamGift
 
         public bool PerformHide()
         {
-            WebDriverWait wait = new WebDriverWait(Driver, TimeSpan.FromSeconds(10));
+            WebDriverWait wait = new WebDriverWait(Driver, TimeSpan.FromSeconds(20));
             if (IsHidden())
                 return true;
             ClickHideButton();
@@ -69,6 +71,18 @@ namespace SteamGifts.Client.Pages.SteamGift
             Actions actions = new Actions(Driver);
             actions.Click(hideButton);
             actions.Perform();
+        }
+
+        private bool IsEnterButtonVisible()
+        {
+            var enterButton = Driver.FindElements(EnterButtonSelector).FirstOrDefault();
+            return enterButton != null;
+        }
+
+        private bool IsHideButtonVisible()
+        {
+            var hideButton = Driver.FindElements(HideButtonSelector).FirstOrDefault();
+            return hideButton != null;
         }
 
         private bool IsConfirmButtonVisible()
