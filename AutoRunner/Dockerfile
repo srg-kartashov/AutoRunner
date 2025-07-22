@@ -4,10 +4,6 @@ WORKDIR /app
 EXPOSE 8080
 EXPOSE 8081
 
-RUN apt-get update && \
-    apt-get install -y chromium chromium-driver && \
-    rm -rf /var/lib/apt/lists/*
-
 # Образ для сборки
 FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
 ARG BUILD_CONFIGURATION=Release
@@ -27,6 +23,11 @@ RUN dotnet build "AutoRunner/AutoRunner.csproj" -c $BUILD_CONFIGURATION -o /app/
 FROM build AS publish
 ARG BUILD_CONFIGURATION=Release
 RUN dotnet publish "AutoRunner/AutoRunner.csproj" -c $BUILD_CONFIGURATION -o /app/publish /p:UseAppHost=false /p:PublishTrimmed=false
+
+# Устанавливаем Playwright CLI и браузеры
+RUN dotnet tool install --global Microsoft.Playwright.CLI \
+    && export PATH="$PATH:/root/.dotnet/tools" \
+    && playwright install chromium --with-deps
 
 # Финальный образ
 FROM base AS final
