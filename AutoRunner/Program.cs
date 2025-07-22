@@ -77,7 +77,7 @@ namespace AutoRunner
             app.UseAuthorization();
 
             app.MapControllers();
-
+             
 #if DEBUG
             app.UseHangfireDashboard();
 #else
