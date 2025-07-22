@@ -75,9 +75,9 @@ namespace AutoRunner
             // Configure the HTTP request pipeline.
             app.UseHttpsRedirection();
 
-            //app.UseAuthorization();
+            app.UseAuthorization();
 
-            //app.MapControllers();
+            app.MapControllers();
 
 #if DEBUG
             app.UseHangfireDashboard();

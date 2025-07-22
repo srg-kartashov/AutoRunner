@@ -9,17 +9,17 @@ namespace AutoRunner.Factories
             var playwright = await Playwright.CreateAsync();
             var browser = await playwright.Chromium.LaunchAsync(new BrowserTypeLaunchOptions
             {
-                Headless = false,
-                //Args = new[]
-                //{
-                //"--window-size=1920,1080",
-                //"--no-sandbox",
-                //"--disable-gpu",
-                //"--disable-dev-shm-usage",
-                //"--disable-extensions",
-                //"--disable-software-rasterizer",
-                //"--single-process",
-                //"--no-zygote"
+                Headless = true,
+                Args = new[]
+                {
+                "--window-size=1920,1080",
+                "--no-sandbox",
+                "--disable-gpu",
+                "--disable-dev-shm-usage",
+                "--disable-extensions",
+                "--disable-software-rasterizer",
+                "--no-zygote"
+                }
             });
 
             var context = await browser.NewContextAsync(new BrowserNewContextOptions
