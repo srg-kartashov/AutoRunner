@@ -3,7 +3,7 @@
 using Hangfire;
 using Hangfire.MissionControl;
 
-using OpenQA.Selenium;
+using Microsoft.Playwright;
 
 using SteamGifts.Client;
 
@@ -31,19 +31,19 @@ namespace AutoRunner.Jobs
         private readonly ILogger<SteamGiftsJoinJob> _logger;
         private readonly ITelegramNotifier<SteamGiftsJoinJob> _telegramNotifier;
         private readonly ISteamPoweredClient _steamPoweredClient;
-        private readonly ISeleniumDriverFactory _seleniumDriverFactory;
+        private readonly IPlaywrightDriverFactory _playwrightDriverFactory;
         private readonly string _token;
 
         public SteamGiftsJoinJob(ILogger<SteamGiftsJoinJob> logger,
             ITelegramNotifier<SteamGiftsJoinJob> telegramNotifier,
             IConfiguration configuration,
             ISteamPoweredClient steamPoweredClient,
-            ISeleniumDriverFactory seleniumDriverFactory)
+            IPlaywrightDriverFactory playwrightDriverFactory)
         {
             _logger = logger;
             _telegramNotifier = telegramNotifier;
             _steamPoweredClient = steamPoweredClient;
-            _seleniumDriverFactory = seleniumDriverFactory;
+            _playwrightDriverFactory = playwrightDriverFactory;
             _token = configuration["SteamGifts:Token"] ?? throw new ArgumentNullException("SteamGifts token is not configured");
         }
 
@@ -54,16 +54,16 @@ namespace AutoRunner.Jobs
         {
             await _telegramNotifier.SendTextAsync("🟢 Starting SteamGifts giveaway join job...");
             var stats = new GiveawayStats();
-            using var driver = _seleniumDriverFactory.CreateDriver();
+            var page = await _playwrightDriverFactory.CreatePageAsync();
 
 
             try
             {
-                var steamGiftsClient = new SteamGiftsClient(driver, _logger);
-                steamGiftsClient.InjectCookies([new Cookie("PHPSESSID", _token, "www.steamgifts.com", "/", null)]);
-                var user = steamGiftsClient.GetUserInfo();
-                var giveaways = steamGiftsClient.GetAllGiveaways().ToList();
-                stats.Total = giveaways.Count;
+                var steamGiftsClient = new SteamGiftsClient(page, _logger);
+                await steamGiftsClient.AuthAsync(_token);
+                var user = await steamGiftsClient.GetUserInfoAsync();
+                var giveaways = await steamGiftsClient.GetAllGiveawaysAsync();
+                stats.Total = giveaways.Count();
                 var currentPoints = user.Points;
 
                 foreach (var giveaway in giveaways)
@@ -106,7 +106,7 @@ namespace AutoRunner.Jobs
                         giveaway.GameName, reviews.Rating, reviews.TotalReviews);
 
                     _logger.LogDebug("🟢 Sufficient points, trying to join giveaway: {GameName}", giveaway.GameName);
-                    var joinResult = steamGiftsClient.JoinGiveaway(giveaway.GiveawayUrl);
+                    var joinResult = await steamGiftsClient.JoinGiveawayAsync(giveaway.GiveawayUrl);
                     if (joinResult)
                     {
                         stats.Joined++;
@@ -125,7 +125,7 @@ namespace AutoRunner.Jobs
             }
             catch (Exception ex)
             {
-                await HandleErrorAsync(ex, driver);
+                await HandleErrorAsync(ex, page);
                 throw;
             }
         }
@@ -145,7 +145,7 @@ namespace AutoRunner.Jobs
             await _telegramNotifier.SendTextAsync(sb.ToString());
         }
 
-        private async Task HandleErrorAsync(Exception ex, IWebDriver driver)
+        private async Task HandleErrorAsync(Exception ex, IPage page)
         {
             _logger.LogError(ex, "Unhandled exception in SteamGifts job");
 
@@ -153,13 +153,10 @@ namespace AutoRunner.Jobs
             {
                 await _telegramNotifier.SendTextAsync($"❌ Exception in SteamGifts job:\n```\n{ex.Message}\n```");
 
-                if (driver is ITakesScreenshot screenshotTaker)
-                {
-                    var screenshot = screenshotTaker.GetScreenshot();
-                    await _telegramNotifier.SendScreenshotAsync(screenshot.AsByteArray, "🖼️ Screenshot at exception");
-                }
+                var screenshotBytes = await page.ScreenshotAsync(new() { FullPage = true });
+                await _telegramNotifier.SendScreenshotAsync(screenshotBytes, "🖼️ Screenshot at exception");
 
-                var html = driver.PageSource;
+                var html = await page.ContentAsync();
                 var htmlBytes = Encoding.UTF8.GetBytes(html);
                 using var htmlStream = new MemoryStream(htmlBytes);
                 await _telegramNotifier.SendFileAsync(htmlStream, "page.html", "📄 Page HTML at exception");

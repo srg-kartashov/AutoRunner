@@ -1,4 +1,4 @@
-﻿using OpenQA.Selenium;
+﻿using Microsoft.Playwright;
 
 using SteamGifts.Client.Utils;
 
@@ -6,18 +6,18 @@ namespace SteamGifts.Client.Pages
 {
     internal class BasePage
     {
-        protected IWebDriver Driver { get; }
+        protected IPage Page { get; }
         protected RandomWaiter RandomWaiter { get; }
 
-        public BasePage(IWebDriver driver)
+        public BasePage(IPage page)
         {
-            Driver = driver;
+            Page = page;
             RandomWaiter = new RandomWaiter();
         }
 
-        public void RefreshPage()
+        public async Task RefreshPageAsync()
         {
-            Driver.Navigate().Refresh();
+            await Page.ReloadAsync();
         }
     }
 }

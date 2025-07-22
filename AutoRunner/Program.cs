@@ -10,7 +10,11 @@ using Hangfire.MissionControl;
 using Hangfire.PostgreSql;
 using Hangfire.RecurringJobExtensions;
 
+using Microsoft.Playwright;
+
 using SteamPowered.Client;
+
+using System.Threading.Tasks;
 
 using TelegramNotifier.Client.Extensions;
 
@@ -18,12 +22,9 @@ namespace AutoRunner
 {
     public class Program
     {
-        public static void Main(string[] args)
+        public static async Task Main(string[] args)
         {
             var builder = WebApplication.CreateBuilder(args);
-
-            // Add services to the container.
-            builder.Services.AddControllers();
 
             var connStr = builder.Configuration.GetConnectionString("DefaultConnection");
             Console.WriteLine($"Conn string: {connStr}");
@@ -59,7 +60,7 @@ namespace AutoRunner
             builder.Services.AddMemoryCache();
             builder.Services.AddHttpClient<ISteamPoweredClient, SteamPoweredCachedService>();
 
-            builder.Services.AddSingleton<ISeleniumDriverFactory, SeleniumDriverFactory>();
+            builder.Services.AddSingleton<IPlaywrightDriverFactory, PlaywrightDriverFactory>();
 
 #if RELEASE
             builder.WebHost.UseUrls("http://0.0.0.0:5000");
@@ -74,9 +75,9 @@ namespace AutoRunner
             // Configure the HTTP request pipeline.
             app.UseHttpsRedirection();
 
-            app.UseAuthorization();
+            //app.UseAuthorization();
 
-            app.MapControllers();
+            //app.MapControllers();
 
 #if DEBUG
             app.UseHangfireDashboard();
