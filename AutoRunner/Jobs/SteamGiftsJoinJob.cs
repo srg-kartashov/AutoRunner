@@ -54,8 +54,8 @@ namespace AutoRunner.Jobs
         {
             await _telegramNotifier.SendTextAsync("🟢 Starting SteamGifts giveaway join job...");
             var stats = new GiveawayStats();
-            var page = await _playwrightDriverFactory.CreatePageAsync();
-
+            await using var ctx = await _playwrightDriverFactory.CreateContextAsync();
+            var page = ctx.Page;
 
             try
             {

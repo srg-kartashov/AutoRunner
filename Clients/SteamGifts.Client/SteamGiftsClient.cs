@@ -34,7 +34,7 @@ namespace SteamGifts.Client
         {
             var page = new SteamGiftPage(_page);
             await page.GoToPage(1);
-            Thread.Sleep(DefaultWaitTime);
+            await Task.Delay(DefaultWaitTime);
             var isAuthorized = await page.IsAuthorizedAsync();
             if (isAuthorized == false)
             {
@@ -67,18 +67,18 @@ namespace SteamGifts.Client
                 _logger?.LogInformation("Loading giveaways from page {Page}", currentPage);
                 await page.GoToPage(currentPage++);
 
-                Thread.Sleep(DefaultWaitTime);
+                await Task.Delay(DefaultWaitTime);
 
                 var isConsentButtonVisible = await page.IsConsentButtonVisibleAsync();
                 if (isConsentButtonVisible)
                 {
                     _logger?.LogInformation("Consent button is visible, clicking it.");
                     await page.ClickConsentButtonIfExistsAsync();
-                    Thread.Sleep(DefaultWaitTime);
+                    await Task.Delay(DefaultWaitTime);
                 }
 
                 var giveaways = await page.GetGiveawaysAsync();
-                Thread.Sleep(DefaultWaitTime);
+                await Task.Delay(DefaultWaitTime);
                 var giveawaysTasks = giveaways.Select(async g => new Giveaway
                 {
                     GameName = await g.GetGameNameAsync(),
@@ -106,7 +106,7 @@ namespace SteamGifts.Client
             _logger?.LogDebug("Trying to join giveaway: {Url}", giveawayUrl);
 
             await page.GoToPageAsync();
-            Thread.Sleep(DefaultWaitTime);
+            await Task.Delay(DefaultWaitTime);
 
             bool result = await page.PerformEnterAsync();
 

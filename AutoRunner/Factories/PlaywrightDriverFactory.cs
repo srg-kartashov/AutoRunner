@@ -4,7 +4,7 @@ namespace AutoRunner.Factories
 {
     public class PlaywrightDriverFactory : IPlaywrightDriverFactory
     {
-        public async Task<IPage> CreatePageAsync()
+        public async Task<PlaywrightContext> CreateContextAsync()
         {
             var playwright = await Playwright.CreateAsync();
             var browser = await playwright.Chromium.LaunchAsync(new BrowserTypeLaunchOptions
@@ -29,7 +29,12 @@ namespace AutoRunner.Factories
             });
 
             var page = await context.NewPageAsync();
-            return page;
+            return new PlaywrightContext(
+                 playwright,
+                 browser,
+                 context,
+                 page);
         }
     }
 }
+

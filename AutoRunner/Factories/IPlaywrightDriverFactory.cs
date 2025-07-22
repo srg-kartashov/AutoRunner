@@ -4,6 +4,6 @@ namespace AutoRunner.Factories
 {
     public interface IPlaywrightDriverFactory
     {
-        Task<IPage> CreatePageAsync();
+        Task<PlaywrightContext> CreateContextAsync();
     }
 }

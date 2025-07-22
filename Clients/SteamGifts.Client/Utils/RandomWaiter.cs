@@ -9,23 +9,23 @@
             Random = new Random();
         }
 
-        public void WaitHours(int hoursFrom, int hoursTo) => WaitMinutes(hoursFrom * 60, hoursTo * 60);
+        public async Task WaitHours(int hoursFrom, int hoursTo) => await WaitMinutes(hoursFrom * 60, hoursTo * 60);
 
-        public void WaitHours(int hours) => WaitHours(0, hours);
+        public async Task WaitHours(int hours) => await WaitHours(0, hours);
 
-        public void WaitMinutes(int minutesFrom, int minutesTo) => WaitSeconds(minutesFrom * 60, minutesTo * 60);
+        public async Task WaitMinutes(int minutesFrom, int minutesTo) => await WaitSeconds(minutesFrom * 60, minutesTo * 60);
 
-        public void WaitMinutes(int minutes) => WaitMinutes(0, minutes);
+        public async Task WaitMinutes(int minutes) => await WaitMinutes(0, minutes);
 
-        public void WaitSeconds(int secondsFrom, int secondsTo) => WaitMilliseconds(secondsFrom * 1000, secondsTo * 1000);
+        public async Task WaitSeconds(int secondsFrom, int secondsTo) => await WaitMilliseconds(secondsFrom * 1000, secondsTo * 1000);
 
-        public void WaitSeconds(int seconds) => WaitSeconds(0, seconds);
+        public async Task WaitSeconds(int seconds) => await WaitSeconds(0, seconds);
 
-        private void WaitMilliseconds(int from, int to)
+        private async Task WaitMilliseconds(int from, int to)
         {
             var value = Random.Next(from, to);
             TimeSpan timeSpan = TimeSpan.FromMilliseconds(value);
-            Thread.Sleep(value);
+            await Task.Delay(value);
         }
     }
 }
