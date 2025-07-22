@@ -1,38 +1,42 @@
 ﻿using Microsoft.Extensions.Logging;
-
-using OpenQA.Selenium;
+using Microsoft.Playwright;
 
 using SteamGifts.Client.Models;
-using SteamGifts.Client.Pages.SteamGift;
+using SteamGifts.Client.Pages;
 
 namespace SteamGifts.Client
 {
     public class SteamGiftsClient
     {
-        private readonly IWebDriver _driver;
+        private readonly IPage _page;
         private readonly ILogger? _logger;
-        private const int DefaultWaitTime = 5000; // Default wait time in milliseconds
+        private const int DefaultWaitTime = 1000; // Default wait time in milliseconds
+        private string _baseUrl = "https://www.steamgifts.com";
 
-        public SteamGiftsClient(IWebDriver driver, ILogger? logger = null)
+        public SteamGiftsClient(IPage page, ILogger? logger = null)
         {
-            _driver = driver;
+            _page = page;
             _logger = logger;
         }
 
-        public void InjectCookies(IEnumerable<Cookie> cookies)
+        public async Task AuthAsync(string tocken)
         {
-            _driver.Navigate().GoToUrl("https://www.steamgifts.com");
-            foreach (var cookie in cookies)
-                _driver.Manage().Cookies.AddCookie(cookie);
-            _driver.Navigate().Refresh();
+            await _page.GotoAsync("https://www.steamgifts.com");
+            var context = _page.Context;
+            await context.ClearCookiesAsync();
+            var phpsessidCookie = new Cookie { Name = "PHPSESSID", Value = tocken, Domain = "www.steamgifts.com", Path = "/" };
+            await context.AddCookiesAsync([phpsessidCookie]);
+
+            await _page.ReloadAsync();
         }
 
-        public UserInfo GetUserInfo()
+        public async Task<UserInfo> GetUserInfoAsync()
         {
-            var page = new SteamGiftPage(_driver);
-            page.GoToPage(1);
+            var page = new SteamGiftPage(_page);
+            await page.GoToPage(1);
             Thread.Sleep(DefaultWaitTime);
-            if (page.IsAuthorized() == false)
+            var isAuthorized = await page.IsAuthorizedAsync();
+            if (isAuthorized == false)
             {
                 _logger?.LogWarning("User is not authorized on SteamGifts");
                 throw new UnauthorizedAccessException("User is not authorized on SteamGifts");
@@ -40,9 +44,9 @@ namespace SteamGifts.Client
 
             var userInfo = new UserInfo
             {
-                Username = page.GetUserName(),
-                Points = page.GetPoints(),
-                Level = page.GetLevel()
+                Username = await page.GetUserNameAsync(),
+                Points = await page.GetPointsAsync(),
+                Level = await page.GetLevelAsync()
             };
 
             _logger?.LogInformation("User info: {Username}, Level {Level}, Points {Points}",
@@ -51,9 +55,9 @@ namespace SteamGifts.Client
             return userInfo;
         }
 
-        public IEnumerable<Giveaway> GetAllGiveaways()
+        public async Task<IEnumerable<Giveaway>> GetAllGiveawaysAsync()
         {
-            var page = new SteamGiftPage(_driver);
+            var page = new SteamGiftPage(_page);
             var result = new List<Giveaway>();
             int currentPage = 1;
 
@@ -61,48 +65,50 @@ namespace SteamGifts.Client
             do
             {
                 _logger?.LogInformation("Loading giveaways from page {Page}", currentPage);
-                page.GoToPage(currentPage++);
+                await page.GoToPage(currentPage++);
 
                 Thread.Sleep(DefaultWaitTime);
 
-                if (page.IsConsentButtonVisible())
+                var isConsentButtonVisible = await page.IsConsentButtonVisibleAsync();
+                if (isConsentButtonVisible)
                 {
                     _logger?.LogInformation("Consent button is visible, clicking it.");
-                    page.ClickConsentButtonIfExists();
+                    await page.ClickConsentButtonIfExistsAsync();
                     Thread.Sleep(DefaultWaitTime);
                 }
 
-                var giveaways = page.GetGiveaways();
+                var giveaways = await page.GetGiveawaysAsync();
                 Thread.Sleep(DefaultWaitTime);
-                var giveawaysData = giveaways.Select(g => new Giveaway
+                var giveawaysTasks = giveaways.Select(async g => new Giveaway
                 {
-                    GameName = g.GetGameName(),
-                    GiveawayUrl = g.GetGiveawayUrl(),
-                    SteamUrl = g.GetSteamUrl(),
-                    Points = g.GetPoints(),
-                    Level = g.GetLevel(),
-                    ApplicationId = g.GetApplicationId(),
-                    Joined = g.HasAlreadyJoined(),
-                    IsCollection = g.IsCollection()
+                    GameName = await g.GetGameNameAsync(),
+                    GiveawayUrl = await g.GetGiveawayUrlAsync(),
+                    SteamUrl = await g.GetSteamUrlAsync(),
+                    Points = await g.GetPointsAsync(),
+                    Level = await g.GetLevelAsync(),
+                    ApplicationId = await g.GetApplicationIdAsync(),
+                    Joined = await g.HasAlreadyJoinedAsync(),
+                    IsCollection = await g.IsCollectionAsync()
                 });
-                result.AddRange(giveawaysData);
+                var resolvedGiveaways = await Task.WhenAll(giveawaysTasks);
+                result.AddRange(resolvedGiveaways);
             }
-            while (page.IsNextPageAvailable());
+            while (await page.IsNextPageAvailableAsync());
 
             _logger?.LogInformation("Collected total {Count} giveaways", result.Count);
             return result;
         }
 
-        public bool JoinGiveaway(string giveawayUrl)
+        public async Task<bool> JoinGiveawayAsync(string giveawayUrl)
         {
-            var page = new GiveawayPage(_driver, giveawayUrl);
+            var page = new GiveawayPage(_page, _baseUrl + giveawayUrl);
 
             _logger?.LogDebug("Trying to join giveaway: {Url}", giveawayUrl);
 
-            page.GoToPage();
+            await page.GoToPageAsync();
             Thread.Sleep(DefaultWaitTime);
 
-            bool result = page.PerformEnter();
+            bool result = await page.PerformEnterAsync();
 
             _logger?.LogInformation("Joined giveaway {Url}: {Result}", giveawayUrl, result);
 
