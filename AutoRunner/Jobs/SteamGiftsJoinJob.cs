@@ -49,7 +49,7 @@ namespace AutoRunner.Jobs
         }
 
         [Mission(Name = "Join SteamGifts Giveaways", Description = "Automatically joins available SteamGifts giveaways")]
-        [RecurringJob("0 9,20 * * *", TimeZone = "Europe/Kyiv", RecurringJobId = "SteamGifts: Auto Join Giveaways")]
+        [RecurringJob("0 9,20 * * *", TimeZone = "FLE Standard Time", RecurringJobId = "SteamGifts: Auto Join Giveaways")]
         [AutomaticRetry(Attempts = 0)]
         [JobDisplayName("SteamGifts: Auto Join Giveaways")]
         public async Task JoinGiveaways(IJobCancellationToken cancellationToken)
