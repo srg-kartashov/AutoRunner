@@ -27,7 +27,8 @@ namespace AutoRunner
             var builder = WebApplication.CreateBuilder(args);
 
             var connStr = builder.Configuration.GetConnectionString("DefaultConnection");
-           
+            builder.Services.AddControllers();
+
             builder.Services.AddHangfire(config =>
                     config.SetDataCompatibilityLevel(CompatibilityLevel.Version_170)
                       .UseSimpleAssemblyNameTypeSerializer()
@@ -73,8 +74,6 @@ namespace AutoRunner
 
             // Configure the HTTP request pipeline.
             app.UseHttpsRedirection();
-
-            app.UseAuthorization();
 
             app.MapControllers();
 
