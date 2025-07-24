@@ -27,8 +27,7 @@ namespace AutoRunner
             var builder = WebApplication.CreateBuilder(args);
 
             var connStr = builder.Configuration.GetConnectionString("DefaultConnection");
-            Console.WriteLine($"Conn string: {connStr}");
-
+           
             builder.Services.AddHangfire(config =>
                     config.SetDataCompatibilityLevel(CompatibilityLevel.Version_170)
                       .UseSimpleAssemblyNameTypeSerializer()
