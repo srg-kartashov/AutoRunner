@@ -52,9 +52,13 @@ namespace AutoRunner.Jobs
         [RecurringJob("0 9,20 * * *", TimeZone = "FLE Standard Time", RecurringJobId = "SteamGifts: Auto Join Giveaways")]
         [AutomaticRetry(Attempts = 0)]
         [JobDisplayName("SteamGifts: Auto Join Giveaways")]
-        public async Task JoinGiveaways(IJobCancellationToken cancellationToken)
+        public async Task JoinGiveaways(IJobCancellationToken cancellationToken, bool withDelay = true)
         {
-            await WaitRandomDelayAsync(cancellationToken, TimeSpan.FromHours(1));
+            if (withDelay)
+            {
+                await WaitRandomDelayAsync(cancellationToken, TimeSpan.FromHours(1));
+            }
+
             await _telegramNotifier.SendTextAsync("🟢 Starting SteamGifts giveaway join job...");
             var stats = new GiveawayStats();
             await using var ctx = await _playwrightDriverFactory.CreateContextAsync();
