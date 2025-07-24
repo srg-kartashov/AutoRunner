@@ -52,7 +52,7 @@ namespace AutoRunner.Jobs
         [RecurringJob("0 9,20 * * *", TimeZone = "FLE Standard Time", RecurringJobId = "SteamGifts: Auto Join Giveaways")]
         [AutomaticRetry(Attempts = 0)]
         [JobDisplayName("SteamGifts: Auto Join Giveaways")]
-        public async Task JoinGiveaways(IJobCancellationToken cancellationToken, bool withDelay = true)
+        public async Task JoinGiveaways(IJobCancellationToken cancellationToken, bool withDelay = true  )
         {
             if (withDelay)
             {
