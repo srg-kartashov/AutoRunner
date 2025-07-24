@@ -39,7 +39,7 @@ namespace AutoRunner
                         {
                             SchemaName = "hangfire"
                         })
-                      //.UseRecurringJob(typeof(SteamGiftsJoinJob))
+                      .UseRecurringJob(typeof(SteamGiftsJoinJob))
                       .UseConsole()
             .UseMissionControl(new MissionControlOptions()
             {
