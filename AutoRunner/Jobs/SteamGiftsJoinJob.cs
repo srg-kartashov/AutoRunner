@@ -2,6 +2,7 @@
 
 using Hangfire;
 using Hangfire.MissionControl;
+using Hangfire.RecurringJobExtensions;
 
 using Microsoft.Playwright;
 
@@ -48,10 +49,12 @@ namespace AutoRunner.Jobs
         }
 
         [Mission(Name = "Join SteamGifts Giveaways", Description = "Automatically joins available SteamGifts giveaways")]
+        [RecurringJob("0 9,20 * * *", TimeZone = "Europe/Kyiv", RecurringJobId = "SteamGifts: Auto Join Giveaways")]
         [AutomaticRetry(Attempts = 0)]
         [JobDisplayName("SteamGifts: Auto Join Giveaways")]
         public async Task JoinGiveaways(IJobCancellationToken cancellationToken)
         {
+            await WaitRandomDelayAsync(cancellationToken, TimeSpan.FromHours(1));
             await _telegramNotifier.SendTextAsync("🟢 Starting SteamGifts giveaway join job...");
             var stats = new GiveawayStats();
             await using var ctx = await _playwrightDriverFactory.CreateContextAsync();
@@ -165,6 +168,17 @@ namespace AutoRunner.Jobs
             {
                 _logger.LogError(notifyEx, "Failed to send error notification to Telegram");
             }
+        }
+
+        private async Task WaitRandomDelayAsync(IJobCancellationToken cancellationToken, TimeSpan delayTime)
+        {
+            var random = new Random();
+            int delayMilliseconds = random.Next(0, (int)delayTime.TotalMilliseconds);
+            var delay = TimeSpan.FromMilliseconds(delayMilliseconds);
+
+            _logger.LogInformation("⏳ Waiting for {DelayMinutes} minutes before starting giveaway job...", delay.TotalMinutes);
+
+            await Task.Delay(delay, cancellationToken.ShutdownToken);
         }
     }
 }
