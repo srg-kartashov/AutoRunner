@@ -48,21 +48,20 @@ namespace AutoRunner.Jobs
             _token = configuration["SteamGifts:Token"] ?? throw new ArgumentNullException("SteamGifts token is not configured");
         }
 
+        [Mission(Name = "Join SteamGifts Giveaways", Description = "Automatically joins available SteamGifts giveaways")]
+
+        [JobDisplayName("SteamGifts: Auto Join Giveaways")]
+        public async Task JoinGiveaways(IJobCancellationToken cancellationToken)
+        {
+            await JoinGiveaways(cancellationToken, false);
+        }
 
         [RecurringJob("0 9,20 * * *", TimeZone = "FLE Standard Time", RecurringJobId = "SteamGifts: Auto Join Giveaways")]
         [AutomaticRetry(Attempts = 0)]
         [JobDisplayName("SteamGifts: Auto Join Giveaways")]
-        public async Task JoinGiveaways(IJobCancellationToken cancellationToken)
+        public async Task JoinGiveaways(IJobCancellationToken cancellationToken, bool? withDelay)
         {
-            await JoinGiveaways(cancellationToken, true);
-        }
-
-        [Mission(Name = "Join SteamGifts Giveaways", Description = "Automatically joins available SteamGifts giveaways")]
-        [AutomaticRetry(Attempts = 0)]
-        [JobDisplayName("SteamGifts: Auto Join Giveaways")]
-        public async Task JoinGiveaways(IJobCancellationToken cancellationToken, bool withDelay)
-        {
-            if (withDelay)
+            if (withDelay ?? true)
             {
                 await WaitRandomDelayAsync(cancellationToken, TimeSpan.FromHours(1));
             }
