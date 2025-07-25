@@ -4,7 +4,6 @@ namespace AutoRunner.Factories
 {
     public record PlaywrightContext(
      IPlaywright Playwright,
-     IBrowser Browser,
      IBrowserContext BrowserContext,
      IPage Page) : IAsyncDisposable
     {
@@ -12,7 +11,6 @@ namespace AutoRunner.Factories
         {
             await Page.CloseAsync();
             await BrowserContext.CloseAsync();
-            await Browser.CloseAsync();
             Playwright.Dispose();
         }
     }
