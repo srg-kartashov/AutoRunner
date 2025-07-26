@@ -51,7 +51,7 @@ namespace IndieGala.Client
             }
         }
 
-        public async Task<UserInfo> GetUserInfoAsync()
+        public async Task<IndieGalaUserInfo> GetUserInfoAsync()
         {
             var page = new IndieGalaPage(_page);
             await page.GoToMainPage();
@@ -75,7 +75,7 @@ namespace IndieGala.Client
                 await page.ClickSpinButtonAsync();
             }
             await Task.Delay(DefaultWaitTime);
-            var userInfo = new UserInfo
+            var userInfo = new IndieGalaUserInfo
             {
                 Username = await page.GetUserNameAsync(),
                 Points = await page.GetPointsAsync(),

@@ -40,7 +40,7 @@ namespace SteamGifts.Client
             }
         }
 
-        public async Task<UserInfo> GetUserInfoAsync()
+        public async Task<SteamGiftsUserInfo> GetUserInfoAsync()
         {
             var page = new SteamGiftPage(_page);
             await page.GoToPage(1);
@@ -52,7 +52,7 @@ namespace SteamGifts.Client
                 throw new UnauthorizedAccessException("User is not authorized on SteamGifts");
             }
 
-            var userInfo = new UserInfo
+            var userInfo = new SteamGiftsUserInfo
             {
                 Username = await page.GetUserNameAsync(),
                 Points = await page.GetPointsAsync(),

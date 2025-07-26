@@ -1,6 +1,6 @@
-﻿namespace SteamGifts.Client.Models
+﻿namespace IndieGala.Client.Models
 {
-    public class UserInfo
+    public class IndieGalaUserInfo
     {
         public string Username { get; set; } = string.Empty;
         public int Points { get; set; }
