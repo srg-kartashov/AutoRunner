@@ -6,6 +6,7 @@ using Hangfire;
 using Hangfire.Console;
 using Hangfire.Console.Extensions;
 using Hangfire.Dashboard.BasicAuthorization;
+using Hangfire.MemoryStorage;
 using Hangfire.MissionControl;
 using Hangfire.PostgreSql;
 using Hangfire.RecurringJobExtensions;
@@ -30,15 +31,16 @@ namespace AutoRunner
             Console.WriteLine($"Conn string: {connStr}");
 
             builder.Services.AddHangfire(config =>
-                    config.SetDataCompatibilityLevel(CompatibilityLevel.Version_170)
-                      .UseSimpleAssemblyNameTypeSerializer()
-                      .UseRecommendedSerializerSettings()
-                      .UsePostgreSqlStorage(
-                        options => options.UseNpgsqlConnection(builder.Configuration.GetConnectionString("DefaultConnection")),
-                        new PostgreSqlStorageOptions
-                        {
-                            SchemaName = "hangfire"
-                        })
+                  config.SetDataCompatibilityLevel(CompatibilityLevel.Version_170)
+                        .UseSimpleAssemblyNameTypeSerializer()
+                        .UseRecommendedSerializerSettings()
+#if DEBUG
+                        .UseMemoryStorage()
+#else
+                        .UsePostgreSqlStorage(
+                            options => options.UseNpgsqlConnection(builder.Configuration.GetConnectionString("DefaultConnection")),
+                            new PostgreSqlStorageOptions { SchemaName = "hangfire" })
+#endif
                       //.UseRecurringJob(typeof(SteamGiftsJoinJob))
                       .UseConsole()
             .UseMissionControl(new MissionControlOptions()
@@ -75,9 +77,9 @@ namespace AutoRunner
             // Configure the HTTP request pipeline.
             app.UseHttpsRedirection();
 
-            app.UseAuthorization();
+            //app.UseAuthorization();
 
-            app.MapControllers();
+            //app.MapControllers();
 
 #if DEBUG
             app.UseHangfireDashboard();

@@ -27,10 +27,10 @@ namespace SteamGifts.Client.Pages
 
         public async Task<bool> PerformEnterAsync()
         {
-            RandomWaiter.WaitSeconds(1, 3);
+            await RandomWaiter.WaitSeconds(1, 3);
             await ClickEnterButtonAsync();
             
-            RandomWaiter.WaitSeconds(1, 3);
+            await RandomWaiter.WaitSeconds(1, 3);
             return await IsEnteredAsync();
         }
 
@@ -40,9 +40,9 @@ namespace SteamGifts.Client.Pages
             if (await IsHiddenAsync())
                 return true;
             await ClickHideButtonAsync();
-            RandomWaiter.WaitSeconds(1, 3);
+            await RandomWaiter.WaitSeconds(1, 3);
             await ClickConfirmButtonAsync();
-            RandomWaiter.WaitSeconds(1, 3);
+            await RandomWaiter.WaitSeconds(1, 3);
             return await IsHiddenAsync();
         }
 

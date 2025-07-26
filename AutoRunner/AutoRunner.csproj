@@ -24,6 +24,7 @@
 		<PackageReference Include="Hangfire.Console.Extensions" Version="2.0.0" />
 		<PackageReference Include="Hangfire.Console.Extensions.Serilog" Version="2.0.0" />
 		<PackageReference Include="Hangfire.Dashboard.BasicAuthorization" Version="1.0.2" />
+		<PackageReference Include="Hangfire.MemoryStorage" Version="1.8.1.2" />
 		<PackageReference Include="Hangfire.MissionControl" Version="0.10.0" />
 		<PackageReference Include="Hangfire.PostgreSql" Version="1.20.12" />
 		<PackageReference Include="Hangfire.RecurringJobExtensions" Version="1.1.6" />
@@ -43,6 +44,7 @@
 	</ItemGroup>
 
 	<ItemGroup>
+	  <ProjectReference Include="..\Clients\IndieGala.Client\IndieGala.Client.csproj" />
 	  <ProjectReference Include="..\Clients\SteamGifts.Client\SteamGifts.Client.csproj" />
 	  <ProjectReference Include="..\Clients\SteamPowered.Client\SteamPowered.Client.csproj" />
 	  <ProjectReference Include="..\Clients\TelegramNotifier.Client\TelegramNotifier.Client.csproj" />
