@@ -32,29 +32,33 @@ namespace IndieGala.Client.Pages
         {
             var button = Page.Locator(JoinButtonSelector);
 
-            try
+            var detachedTask = button.WaitForAsync(new()
             {
-                await button.WaitForAsync(new()
-                {
-                    State = WaitForSelectorState.Detached, 
-                    Timeout = 10_000
-                });
+                State = WaitForSelectorState.Detached,
+                Timeout = 10_000
+            }).ContinueWith(t => !t.IsFaulted);
 
-                return true;
-            }
-            catch (TimeoutException)
+            var joinedTextTask = Task.Run(async () =>
             {
                 try
                 {
-                    var joinedButton = Page.Locator(JoinButtonSelector);
-                    var text = await joinedButton.TextContentAsync();
+                    await button.WaitForAsync(new()
+                    {
+                        State = WaitForSelectorState.Visible,
+                        Timeout = 10_000
+                    });
+
+                    var text = await button.TextContentAsync();
                     return text != null && text.Contains("Joined", StringComparison.OrdinalIgnoreCase);
                 }
                 catch
                 {
                     return false;
                 }
-            }
+            });
+
+            var results = await Task.WhenAll(detachedTask, joinedTextTask);
+            return results.Any(r => r);
         }
 
         private async Task ClickJoinButtonAsync()

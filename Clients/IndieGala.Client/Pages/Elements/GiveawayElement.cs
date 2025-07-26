@@ -1,11 +1,6 @@
 ﻿using Microsoft.Playwright;
 
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Text.RegularExpressions;
-using System.Threading.Tasks;
 
 namespace IndieGala.Client.Pages.Elements
 {
@@ -43,9 +38,8 @@ namespace IndieGala.Client.Pages.Elements
             }
             catch(Exception ex)
             {
-                ;
+                return string.Empty;
             }
-            return string.Empty;
         }
 
         private string ParseAppId(string url)
