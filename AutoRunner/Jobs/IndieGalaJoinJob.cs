@@ -85,7 +85,7 @@ namespace AutoRunner.Jobs
                     if (review != null)
                     {
                         var score = review.Rating * Math.Log10(review.TotalReviews + 1);
-                        giveawayToReviews.Add((g, review.Rating, review.TotalReviews, review.Rating * score));
+                        giveawayToReviews.Add((g, review.Rating, review.TotalReviews, score));
                         _logger.LogInformation("📊 Fetched reviews for {GameName}: {Rating:F2}%, Total reviews: {TotalReviews}",
                             g.GameName, review.Rating, review.TotalReviews);
                     }
