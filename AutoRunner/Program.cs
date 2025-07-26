@@ -6,6 +6,7 @@ using Hangfire;
 using Hangfire.Console;
 using Hangfire.Console.Extensions;
 using Hangfire.Dashboard.BasicAuthorization;
+using Hangfire.MemoryStorage;
 using Hangfire.MissionControl;
 using Hangfire.PostgreSql;
 using Hangfire.RecurringJobExtensions;
@@ -30,16 +31,18 @@ namespace AutoRunner
             builder.Services.AddControllers();
 
             builder.Services.AddHangfire(config =>
-                    config.SetDataCompatibilityLevel(CompatibilityLevel.Version_170)
-                      .UseSimpleAssemblyNameTypeSerializer()
-                      .UseRecommendedSerializerSettings()
-                      .UsePostgreSqlStorage(
-                        options => options.UseNpgsqlConnection(builder.Configuration.GetConnectionString("DefaultConnection")),
-                        new PostgreSqlStorageOptions
-                        {
-                            SchemaName = "hangfire"
-                        })
+                  config.SetDataCompatibilityLevel(CompatibilityLevel.Version_170)
+                        .UseSimpleAssemblyNameTypeSerializer()
+                        .UseRecommendedSerializerSettings()
+#if DEBUG
+                        .UseMemoryStorage()
+#else
+                        .UsePostgreSqlStorage(
+                            options => options.UseNpgsqlConnection(builder.Configuration.GetConnectionString("DefaultConnection")),
+                            new PostgreSqlStorageOptions { SchemaName = "hangfire" })
+#endif
                       .UseRecurringJob(typeof(SteamGiftsJoinJob))
+                      .UseRecurringJob(typeof(IndieGalaJoinJob))
                       .UseConsole()
             .UseMissionControl(new MissionControlOptions()
             {

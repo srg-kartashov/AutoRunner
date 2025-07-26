@@ -29,7 +29,7 @@ namespace SteamGifts.Client.Pages
         {
             await RandomWaiter.WaitSeconds(1, 3);
             await ClickEnterButtonAsync();
-             
+            
             await RandomWaiter.WaitSeconds(1, 3);
             return await IsEnteredAsync();
         }
