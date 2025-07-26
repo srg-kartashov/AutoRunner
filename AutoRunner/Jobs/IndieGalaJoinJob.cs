@@ -56,7 +56,7 @@ namespace AutoRunner.Jobs
                 await WaitRandomDelayAsync(cancellationToken, TimeSpan.FromHours(1));
             }
 
-            await _telegramNotifier.SendTextAsync("🟢 Starting SteamGifts giveaway join job...");
+            await _telegramNotifier.SendTextAsync("🟢 Starting IndieGala giveaway join job...");
             var stats = new GiveawayStats();
 
             await using var ctx = await _playwrightDriverFactory.CreateContextAsync();
@@ -143,7 +143,7 @@ namespace AutoRunner.Jobs
         private async Task SendSummaryAsync(GiveawayStats stats, int remainingPoints)
         {
             var sb = new StringBuilder();
-            sb.AppendLine("🎉 <b>SteamGifts Giveaway Join Summary</b>");
+            sb.AppendLine("🎉 <b>IndieGala Giveaway Join Summary</b>");
             sb.AppendLine($"🧾 Total giveaways: <b>{stats.Total}</b>");
             sb.AppendLine($"✅ Joined: <b>{stats.Joined}</b>");
             sb.AppendLine($"🔁 Skipped collections: <b>{stats.SkippedCollections}</b>");

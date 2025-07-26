@@ -30,9 +30,15 @@ namespace IndieGala.Client.Pages
 
         public async Task<bool> IsAuthorizedAsync()
         {
-            var loginButtons = await Page.QuerySelectorAllAsync(LoginButtonSelector);
-
-            return loginButtons.Count == 0;
+            try
+            {
+                var loginButtons = Page.Locator(LoginButtonSelector);
+                return await loginButtons.CountAsync() == 0;
+            }
+            catch (Exception ex)
+            {
+                return false;
+            }
         }
 
         public async Task<string> GetUserNameAsync()
