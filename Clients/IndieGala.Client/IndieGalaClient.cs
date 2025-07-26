@@ -88,10 +88,10 @@ namespace IndieGala.Client
             return userInfo;
         }
 
-        public async Task<IEnumerable<Giveaway>> GetAllGiveawaysAsync()
+        public async Task<IEnumerable<IndieGalaGiveaway>> GetAllGiveawaysAsync()
         {
             var page = new IndieGalaPage(_page);
-            var result = new List<Giveaway>();
+            var result = new List<IndieGalaGiveaway>();
             bool firstPage = true;
             int currentPage = 1;
              
@@ -125,7 +125,7 @@ namespace IndieGala.Client
 
                 var giveaways = await page.GetGiveawaysAsync();
                
-                var giveawaysTasks = giveaways.Select(async g => new Giveaway
+                var giveawaysTasks = giveaways.Select(async g => new IndieGalaGiveaway
                 {
                     GameName = await g.GetGameNameAsync(),
                     GiveawayUrl = await g.GetGiveawayUrlAsync(),

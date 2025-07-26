@@ -1,6 +1,6 @@
 ﻿namespace SteamGifts.Client.Models
 {
-    public class Giveaway
+    public class SteamGiftsGiveaway
     {
         public string GameName { get; set; } = string.Empty;
         public string GiveawayUrl { get; set; } = string.Empty;

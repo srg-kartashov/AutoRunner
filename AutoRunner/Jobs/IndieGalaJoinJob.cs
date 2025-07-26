@@ -5,7 +5,9 @@ using Hangfire.MissionControl;
 using Hangfire.RecurringJobExtensions;
 
 using IndieGala.Client;
+using IndieGala.Client.Models;
 
+using Microsoft.Extensions.Logging;
 using Microsoft.Playwright;
 
 using SteamPowered.Client;
@@ -68,15 +70,46 @@ namespace AutoRunner.Jobs
                 await indieGalaClient.AuthAsync(_sessionId);
                 var user = await indieGalaClient.GetUserInfoAsync();
                 var giveaways = await indieGalaClient.GetAllGiveawaysAsync();
-                var joinedGiveaways = giveaways.Where(g => g.Joined).ToList();
                 var currentPoints = user.Points;
-                foreach (var giveaway in giveaways)
+
+                _logger.LogInformation("📝 Fetched {Count} giveaways from IndieGala", giveaways.Count());
+
+                List<(IndieGalaGiveaway Giveaway, double Rating, double TotalReviews, double Score)> giveawayToReviews = new();
+               
+                foreach (var g in giveaways)
                 {
+                    if (string.IsNullOrEmpty(g.ApplicationId))
+                        _logger.LogWarning("⚠️ Giveaway {GameName} has no ApplicationId, skipping review fetch", g.GameName);
+
+                    var review = await _steamPoweredClient.GetAppReviewsAsync(g.ApplicationId);
+                    if (review != null)
+                    {
+                        var score = review.Rating * Math.Log10(review.TotalReviews + 1);
+                        giveawayToReviews.Add((g, review.Rating, review.TotalReviews, review.Rating * score));
+                        _logger.LogInformation("📊 Fetched reviews for {GameName}: {Rating:F2}%, Total reviews: {TotalReviews}",
+                            g.GameName, review.Rating, review.TotalReviews);
+                    }
+                    else
+                    {
+                        _logger.LogWarning("⚠️ Failed to fetch reviews for game: {GameName}, AppId: {AppId}",
+                              g.GameName, g.ApplicationId);
+                        continue;
+                    }
+                }
+
+               
+
+                foreach (var giveawayToReview in giveawayToReviews.OrderByDescending(e=>e.Score))
+                {
+                    var giveaway = giveawayToReview.Giveaway;
+
                     cancellationToken.ThrowIfCancellationRequested();
                     _logger.LogInformation("🎯 Processing giveaway: {GameName}, AppId: {AppId}, Required points: {Points}, Current points: {CurrentPoints}",
                         giveaway.GameName, giveaway.ApplicationId, giveaway.Points, currentPoints);
+                    _logger.LogInformation("📊 Review for {GameName}: {Rating:F2}%, Total reviews: {TotalReviews}, Score: {Score}",
+                      giveaway.GameName, giveawayToReview.Rating, giveawayToReview.TotalReviews, giveawayToReview.Score);
 
-                    if(giveaway.Level > user.Level)
+                    if (giveaway.Level > user.Level)
                     {
                         _logger.LogInformation("🔒 Skipped giveaway due to insufficient level: {GameName} (Required: {Level}, Current: {UserLevel})",
                             giveaway.GameName, giveaway.Level, user.Level);
@@ -103,17 +136,6 @@ namespace AutoRunner.Jobs
                             giveaway.GameName, giveaway.Points, currentPoints);
                         continue;
                     }
-
-                    var reviews = await _steamPoweredClient.GetAppReviewsAsync(giveaway.ApplicationId);
-                    if (reviews == null)
-                    {
-                        _logger.LogWarning("⚠️ Failed to fetch reviews for game: {GameName}, AppId: {AppId}",
-                             giveaway.GameName, giveaway.ApplicationId);
-                        continue;
-                    }
-
-                    _logger.LogInformation("📊 Review for {GameName}: {Rating:F2}%, Total reviews: {TotalReviews}",
-                        giveaway.GameName, reviews.Rating, reviews.TotalReviews);
 
                     _logger.LogDebug("🟢 Sufficient points, trying to join giveaway: {GameName}", giveaway.GameName);
                     var joinResult = await indieGalaClient.JoinGiveawayAsync(giveaway.GiveawayUrl);

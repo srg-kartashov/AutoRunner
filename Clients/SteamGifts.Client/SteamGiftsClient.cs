@@ -65,10 +65,10 @@ namespace SteamGifts.Client
             return userInfo;
         }
 
-        public async Task<IEnumerable<Giveaway>> GetAllGiveawaysAsync()
+        public async Task<IEnumerable<SteamGiftsGiveaway>> GetAllGiveawaysAsync()
         {
             var page = new SteamGiftPage(_page);
-            var result = new List<Giveaway>();
+            var result = new List<SteamGiftsGiveaway>();
             int currentPage = 1;
 
            
@@ -89,7 +89,7 @@ namespace SteamGifts.Client
 
                 var giveaways = await page.GetGiveawaysAsync();
                 await Task.Delay(DefaultWaitTime);
-                var giveawaysTasks = giveaways.Select(async g => new Giveaway
+                var giveawaysTasks = giveaways.Select(async g => new SteamGiftsGiveaway
                 {
                     GameName = await g.GetGameNameAsync(),
                     GiveawayUrl = await g.GetGiveawayUrlAsync(),

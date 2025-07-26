@@ -4,9 +4,12 @@ using Hangfire;
 using Hangfire.MissionControl;
 using Hangfire.RecurringJobExtensions;
 
+using IndieGala.Client.Models;
+
 using Microsoft.Playwright;
 
 using SteamGifts.Client;
+using SteamGifts.Client.Models;
 
 using SteamPowered.Client;
 
@@ -79,12 +82,38 @@ namespace AutoRunner.Jobs
                 var giveaways = await steamGiftsClient.GetAllGiveawaysAsync();
                 stats.Total = giveaways.Count();
                 var currentPoints = user.Points;
+                _logger.LogInformation("📝 Fetched {Count} giveaways from SteamGifts", giveaways.Count());
 
-                foreach (var giveaway in giveaways)
+                List<(SteamGiftsGiveaway Giveaway, double Rating, double TotalReviews, double Score)> giveawayToReviews = new();
+
+                foreach (var g in giveaways)
                 {
-                    cancellationToken.ThrowIfCancellationRequested();
+                    if (string.IsNullOrEmpty(g.ApplicationId))
+                        _logger.LogWarning("⚠️ Giveaway {GameName} has no ApplicationId, skipping review fetch", g.GameName);
+
+                    var review = await _steamPoweredClient.GetAppReviewsAsync(g.ApplicationId);
+                    if (review != null)
+                    {
+                        var score = review.Rating * Math.Log10(review.TotalReviews + 1);
+                        giveawayToReviews.Add((g, review.Rating, review.TotalReviews, review.Rating * score));
+                        _logger.LogInformation("📊 Fetched reviews for {GameName}: {Rating:F2}%, Total reviews: {TotalReviews}",
+                            g.GameName, review.Rating, review.TotalReviews);
+                    }
+                    else
+                    {
+                        _logger.LogWarning("⚠️ Failed to fetch reviews for game: {GameName}, AppId: {AppId}",
+                              g.GameName, g.ApplicationId);
+                        continue;
+                    }
+                }
+
+                foreach (var giveawayToReview in giveawayToReviews.OrderByDescending(e => e.Score))
+                {
+                    var giveaway = giveawayToReview.Giveaway;
                     _logger.LogInformation("🎯 Processing giveaway: {GameName}, AppId: {AppId}, Required points: {Points}, Current points: {CurrentPoints}",
-                        giveaway.GameName, giveaway.ApplicationId, giveaway.Points, currentPoints);
+                       giveaway.GameName, giveaway.ApplicationId, giveaway.Points, currentPoints);
+                    _logger.LogInformation("📊 Review for {GameName}: {Rating:F2}%, Total reviews: {TotalReviews}, Score: {Score}",
+                      giveaway.GameName, giveawayToReview.Rating, giveawayToReview.TotalReviews, giveawayToReview.Score);
 
                     if (giveaway.Joined)
                     {
@@ -107,17 +136,6 @@ namespace AutoRunner.Jobs
                             giveaway.GameName, giveaway.Points, currentPoints);
                         continue;
                     }
-
-                    var reviews = await _steamPoweredClient.GetAppReviewsAsync(giveaway.ApplicationId);
-                    if (reviews == null)
-                    {
-                        _logger.LogWarning("⚠️ Failed to fetch reviews for game: {GameName}, AppId: {AppId}",
-                             giveaway.GameName, giveaway.ApplicationId);
-                        continue;
-                    }
-
-                    _logger.LogInformation("📊 Review for {GameName}: {Rating:F2}%, Total reviews: {TotalReviews}",
-                        giveaway.GameName, reviews.Rating, reviews.TotalReviews);
 
                     _logger.LogDebug("🟢 Sufficient points, trying to join giveaway: {GameName}", giveaway.GameName);
                     var joinResult = await steamGiftsClient.JoinGiveawayAsync(giveaway.GiveawayUrl);

@@ -1,6 +1,6 @@
 ﻿namespace IndieGala.Client.Models
 {
-    public record Giveaway
+    public record IndieGalaGiveaway
     {
         public string GameName { get; set; } = string.Empty;
         public string GiveawayUrl { get; set; } = string.Empty;
