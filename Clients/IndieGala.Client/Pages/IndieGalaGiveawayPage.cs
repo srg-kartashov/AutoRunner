@@ -44,7 +44,16 @@ namespace IndieGala.Client.Pages
             }
             catch (TimeoutException)
             {
-                return false;
+                try
+                {
+                    var joinedButton = Page.Locator(JoinButtonSelector);
+                    var text = await joinedButton.TextContentAsync();
+                    return text != null && text.Contains("Joined", StringComparison.OrdinalIgnoreCase);
+                }
+                catch
+                {
+                    return false;
+                }
             }
         }
 
