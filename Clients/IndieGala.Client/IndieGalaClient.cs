@@ -29,7 +29,7 @@ namespace IndieGala.Client
         public async Task AuthAsync(string sessionId)
         {
             var page = new IndieGalaPage(_page);
-            await page.GoToMainPage();
+            await page.GoToPage();
             await Task.Delay(DefaultWaitTime * 5);
             var isAuthorized = await page.IsAuthorizedAsync();
             if(!isAuthorized)

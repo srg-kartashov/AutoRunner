@@ -17,7 +17,7 @@ namespace IndieGala.Client.Pages
         private string UserNameSelector => "li.avatar-username div.username-text";
         private string PointsSelector => "li.user-wallet span#galasilver-amount";
         private string LevelSelector => "li.user-wallet span#userGiveawaysLevel";
-        private string LoginButtonSelector => "div.left username div.username-text";
+        private string LoginButtonSelector => "div.not-logged a span:has-text(\"LOGIN\")";
         private string DisallowButtonSelector => "div.sp-prompt-message button.sp-prompt-btn.sp-disallow-btn";
         private string SpinButtonSelector => "div.fortune-wheel-cont.flex.relative div.fortune-wheel-outer.relative button";
         private string FortuneResultButtonCloseSelector => "div.fortune-wheel-results div.flex button";
