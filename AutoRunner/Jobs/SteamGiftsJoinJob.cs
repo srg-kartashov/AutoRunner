@@ -86,7 +86,7 @@ namespace AutoRunner.Jobs
 
                 List<(SteamGiftsGiveaway Giveaway, double Rating, double TotalReviews, double Score)> giveawayToReviews = new();
 
-                foreach (var g in giveaways)
+                foreach (var g in giveaways.Where(e=>!e.IsCollection))
                 {
                     if (string.IsNullOrEmpty(g.ApplicationId))
                         _logger.LogWarning("⚠️ Giveaway {GameName} has no ApplicationId, skipping review fetch", g.GameName);
