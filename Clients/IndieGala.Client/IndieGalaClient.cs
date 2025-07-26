@@ -30,10 +30,11 @@ namespace IndieGala.Client
         {
             var page = new IndieGalaPage(_page);
             await page.GoToMainPage();
-            await Task.Delay(DefaultWaitTime);
+            await Task.Delay(DefaultWaitTime * 5);
             var isAuthorized = await page.IsAuthorizedAsync();
             if(!isAuthorized)
             {
+                _logger?.LogInformation("User is not authorized, attempting to authenticate with session ID.");
                 var context = _page.Context;
                 await context.ClearCookiesAsync();
 
