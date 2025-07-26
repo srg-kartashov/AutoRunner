@@ -47,6 +47,7 @@ jobs:
               -e Hangfire__Login="${{ secrets.HANGFIRE_LOGIN }}" \
               -e Hangfire__Password="${{ secrets.HANGFIRE_PASSWORD }}" \
               -e SteamGifts__Token="${{ secrets.STEAMGIFTS_TOKEN }}" \
+              -e IndieGala__SessionId="${{ secrets.INDIEGALA_SESSIONID }}" \
               -e TelegramNotifier__BotToken="${{ secrets.TELEGRAMNOTIFIER_BOTTOKEN }}" \
               -p 5000:5000 \
               autorunner:latest
