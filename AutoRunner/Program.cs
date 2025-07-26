@@ -28,7 +28,7 @@ namespace AutoRunner
             var builder = WebApplication.CreateBuilder(args);
 
             var connStr = builder.Configuration.GetConnectionString("DefaultConnection");
-            Console.WriteLine($"Conn string: {connStr}");
+            builder.Services.AddControllers();
 
             builder.Services.AddHangfire(config =>
                   config.SetDataCompatibilityLevel(CompatibilityLevel.Version_170)
@@ -41,7 +41,7 @@ namespace AutoRunner
                             options => options.UseNpgsqlConnection(builder.Configuration.GetConnectionString("DefaultConnection")),
                             new PostgreSqlStorageOptions { SchemaName = "hangfire" })
 #endif
-                      //.UseRecurringJob(typeof(SteamGiftsJoinJob))
+                      .UseRecurringJob(typeof(SteamGiftsJoinJob))
                       .UseConsole()
             .UseMissionControl(new MissionControlOptions()
             {
@@ -77,9 +77,7 @@ namespace AutoRunner
             // Configure the HTTP request pipeline.
             app.UseHttpsRedirection();
 
-            //app.UseAuthorization();
-
-            //app.MapControllers();
+            app.MapControllers();
 
 #if DEBUG
             app.UseHangfireDashboard();

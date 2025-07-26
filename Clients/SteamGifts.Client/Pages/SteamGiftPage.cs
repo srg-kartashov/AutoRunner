@@ -127,9 +127,16 @@ namespace SteamGifts.Client.Pages
 
         public async Task<bool> IsAuthorizedAsync()
         {
-            var elements = await Page.QuerySelectorAllAsync(UserNameSelector);
-            var userName = elements.FirstOrDefault();
-            return userName != null && Page.Url.Contains("https://www.steamgifts.com/");
+            try
+            {
+                var elements = Page.Locator(UserNameSelector);
+                var userNameVisible = await elements.IsVisibleAsync();
+                return userNameVisible;
+            }
+            catch (Exception ex)
+            {
+                return false;
+            }
         }
 
         public async Task<bool> IsNextPageAvailableAsync()

@@ -7,7 +7,8 @@ namespace AutoRunner.Factories
         public async Task<PlaywrightContext> CreateContextAsync()
         {
             var playwright = await Playwright.CreateAsync();
-            var browser = await playwright.Chromium.LaunchAsync(new BrowserTypeLaunchOptions
+            var userDataDir = Path.Combine(Directory.GetCurrentDirectory(), "playwright-user-data");
+            var context = await playwright.Chromium.LaunchPersistentContextAsync(userDataDir, new BrowserTypeLaunchPersistentContextOptions
             {
                 Headless = true,
                 Args = new[]
@@ -19,19 +20,16 @@ namespace AutoRunner.Factories
                 "--disable-extensions",
                 "--disable-software-rasterizer",
                 "--no-zygote"
-                }
-            });
-
-            var context = await browser.NewContextAsync(new BrowserNewContextOptions
-            {
+                },
                 ViewportSize = new ViewportSize { Width = 1920, Height = 1080 },
                 UserAgent = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/107.0.0.0 Safari/537.36"
             });
 
-            var page = await context.NewPageAsync();
+            var page = context.Pages.FirstOrDefault() ?? await context.NewPageAsync();
+
+
             return new PlaywrightContext(
                  playwright,
-                 browser,
                  context,
                  page);
         }

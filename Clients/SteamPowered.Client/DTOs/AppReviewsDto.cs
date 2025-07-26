@@ -8,19 +8,19 @@ namespace SteamPowered.Client.DTOs
         public int Success { get; set; }
 
         [JsonProperty("query_summary")]
-        public QuerySummaryDto QuerySummary { get; set; }
+        public QuerySummaryDto? QuerySummary { get; set; }
 
         [JsonProperty("reviews")]
-        public List<ReviewDto> Reviews { get; set; }
+        public List<ReviewDto>? Reviews { get; set; }
 
         [JsonProperty("cursor")]
-        public string Cursor { get; set; }
+        public string? Cursor { get; set; }
     }
 
     internal class AuthorDto
     {
         [JsonProperty("steamid")]
-        public string Steamid { get; set; }
+        public string? Steamid { get; set; }
 
         [JsonProperty("num_games_owned")]
         public int NumGamesOwned { get; set; }
@@ -50,7 +50,7 @@ namespace SteamPowered.Client.DTOs
         public int ReviewScore { get; set; }
 
         [JsonProperty("review_score_desc")]
-        public string ReviewScoreDesc { get; set; }
+        public string? ReviewScoreDesc { get; set; }
 
         [JsonProperty("total_positive")]
         public int TotalPositive { get; set; }
@@ -65,16 +65,16 @@ namespace SteamPowered.Client.DTOs
     internal class ReviewDto
     {
         [JsonProperty("recommendationid")]
-        public string Recommendationid { get; set; }
+        public string? Recommendationid { get; set; }
 
         [JsonProperty("author")]
-        public AuthorDto Author { get; set; }
+        public AuthorDto? Author { get; set; }
 
         [JsonProperty("language")]
-        public string Language { get; set; }
+        public string? Language { get; set; }
 
         [JsonProperty("review")]
-        public string ReviewData { get; set; }
+        public string? ReviewData { get; set; }
 
         [JsonProperty("timestamp_created")]
         public int TimestampCreated { get; set; }
@@ -92,7 +92,7 @@ namespace SteamPowered.Client.DTOs
         public int VotesFunny { get; set; }
 
         [JsonProperty("weighted_vote_score")]
-        public string WeightedVoteScore { get; set; }
+        public string? WeightedVoteScore { get; set; }
 
         [JsonProperty("comment_count")]
         public int CommentCount { get; set; }
@@ -110,6 +110,6 @@ namespace SteamPowered.Client.DTOs
         public bool HiddenInSteamChina { get; set; }
 
         [JsonProperty("steam_china_location")]
-        public string SteamChinaLocation { get; set; }
+        public string? SteamChinaLocation { get; set; }
     }
 }

@@ -21,13 +21,23 @@ namespace SteamGifts.Client
 
         public async Task AuthAsync(string tocken)
         {
-            await _page.GotoAsync("https://www.steamgifts.com");
-            var context = _page.Context;
-            await context.ClearCookiesAsync();
-            var phpsessidCookie = new Cookie { Name = "PHPSESSID", Value = tocken, Domain = "www.steamgifts.com", Path = "/" };
-            await context.AddCookiesAsync([phpsessidCookie]);
-
-            await _page.ReloadAsync();
+            var page = new SteamGiftPage(_page);
+            await page.GoToPage(1);
+            var isAuthorized = await page.IsAuthorizedAsync();
+            if(!isAuthorized)
+            {
+                _logger?.LogInformation("User is not authorized, attempting to authenticate with token.");
+                var context = _page.Context;
+                await context.ClearCookiesAsync();
+                var phpsessidCookie = new Cookie { Name = "PHPSESSID", Value = tocken, Domain = "www.steamgifts.com", Path = "/" };
+                await context.AddCookiesAsync([phpsessidCookie]);
+                await _page.ReloadAsync();
+            }
+            else
+            {
+                _logger?.LogInformation("User is already authorized.");
+                return;
+            }
         }
 
         public async Task<UserInfo> GetUserInfoAsync()
