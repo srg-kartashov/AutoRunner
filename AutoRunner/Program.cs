@@ -42,6 +42,7 @@ namespace AutoRunner
                             new PostgreSqlStorageOptions { SchemaName = "hangfire" })
 #endif
                       .UseRecurringJob(typeof(SteamGiftsJoinJob))
+                      .UseRecurringJob(typeof(IndieGalaJoinJob))
                       .UseConsole()
             .UseMissionControl(new MissionControlOptions()
             {
