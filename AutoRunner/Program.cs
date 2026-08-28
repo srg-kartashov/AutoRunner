@@ -42,12 +42,11 @@ namespace AutoRunner
                             new PostgreSqlStorageOptions { SchemaName = "hangfire" })
 #endif
                       .UseRecurringJob(typeof(SteamGiftsJoinJob))
-                      .UseRecurringJob(typeof(IndieGalaJoinJob))
                       .UseConsole()
             .UseMissionControl(new MissionControlOptions()
             {
-                RequireConfirmation = false,    // Отключение подтверждения для запуска задач
-                HideCodeSnippet = false         // Отображение кода задачи
+                RequireConfirmation = false,    // РћС‚РєР»СЋС‡РµРЅРёРµ РїРѕРґС‚РІРµСЂР¶РґРµРЅРёСЏ РґР»СЏ Р·Р°РїСѓСЃРєР° Р·Р°РґР°С‡
+                HideCodeSnippet = false         // РћС‚РѕР±СЂР°Р¶РµРЅРёРµ РєРѕРґР° Р·Р°РґР°С‡Рё
             },
             typeof(SteamGiftsJoinJob).Assembly)
             );
@@ -55,7 +54,7 @@ namespace AutoRunner
             builder.Services.AddHangfireServer(options =>
             {
                 options.ServerName = builder.Configuration["Hangfire:ServerName"] ?? "default-server";
-                options.WorkerCount = 1; // Количество воркеров, обрабатывающих задачи
+                options.WorkerCount = 1; // РљРѕР»РёС‡РµСЃС‚РІРѕ РІРѕСЂРєРµСЂРѕРІ, РѕР±СЂР°Р±Р°С‚С‹РІР°СЋС‰РёС… Р·Р°РґР°С‡Рё
             });
 
             builder.Services.AddTelegramNotifier(builder.Configuration);

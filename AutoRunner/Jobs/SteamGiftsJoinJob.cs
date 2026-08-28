@@ -4,8 +4,6 @@ using Hangfire;
 using Hangfire.MissionControl;
 using Hangfire.RecurringJobExtensions;
 
-using IndieGala.Client.Models;
-
 using Microsoft.Playwright;
 
 using SteamGifts.Client;
