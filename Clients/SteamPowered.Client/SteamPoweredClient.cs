@@ -13,9 +13,9 @@ namespace SteamPowered.Client
     {
         private const string BaseUrl = "https://store.steampowered.com";
         private readonly HttpClient _httpClient;
-        private readonly ILogger? _logger;
+        private readonly ILogger<SteamPoweredClient>? _logger;
 
-        public SteamPoweredClient(HttpClient httpClient, ILogger? logger = null)
+        public SteamPoweredClient(HttpClient httpClient, ILogger<SteamPoweredClient>? logger = null)
         {
             _httpClient = httpClient;
             _httpClient.BaseAddress ??= new Uri(BaseUrl);

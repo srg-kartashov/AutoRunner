@@ -353,6 +353,9 @@ ASALocalRun/
 # BeatPulse healthcheck temp database
 healthchecksdb
 
+# Local persistent Steam review cache (including SQLite journal files)
+steam-reviews-cache.db*
+
 # Backup folder for Package Reference Convert tool in Visual Studio 2017
 MigrationBackup/
 

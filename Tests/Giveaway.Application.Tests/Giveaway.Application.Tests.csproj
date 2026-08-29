@@ -19,6 +19,8 @@
   <ItemGroup>
     <ProjectReference Include="..\..\Libraries\Giveaway.Application\Giveaway.Application.csproj" />
     <ProjectReference Include="..\..\Libraries\Giveaway.Contracts\Giveaway.Contracts.csproj" />
+    <ProjectReference Include="..\..\Libraries\SteamReviews.DataBase\SteamReviews.DataBase.csproj" />
+    <ProjectReference Include="..\..\Clients\SteamPowered.Client\SteamPowered.Client.csproj" />
   </ItemGroup>
 
 </Project>

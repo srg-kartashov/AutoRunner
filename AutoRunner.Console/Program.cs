@@ -72,7 +72,7 @@ public class Program
         builder.Logging.AddConfiguration(builder.Configuration.GetSection("Logging"));
         builder.Logging.AddSimpleConsole();
 
-        builder.Services.AddGiveawayAutomation(builder.Configuration);
+        builder.Services.AddGiveawayAutomation(builder.Configuration, AppReviewsCacheStorage.Sqlite);
 
         var telegramSection = builder.Configuration.GetSection("TelegramNotifier");
         if (!string.IsNullOrWhiteSpace(telegramSection["BotToken"]) &&
