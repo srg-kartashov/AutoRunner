@@ -104,7 +104,7 @@ namespace SteamGifts.Client.Pages
 
         private async Task<bool> IsHiddenAsync()
         {
-            return await Page.Locator(HideButtonSelector).IsVisibleAsync();
+            return !await Page.Locator(HideButtonSelector).IsVisibleAsync();
         }
     }
 }

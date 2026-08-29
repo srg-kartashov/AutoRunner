@@ -11,13 +11,12 @@ namespace SteamGifts.Client.Pages
     {
         private readonly string baseUrl = "https://www.steamgifts.com/";
         private string CurrentPageSelector => "div.pagination__navigation a.is-selected span";
-        private string GiveawaysSelector =>"div:not([class]) div:not([class]) div.giveaway__row-inner-wrap";
+        private string GiveawaysSelector => "div:not([class]) div:not([class]) div.giveaway__row-inner-wrap";
         private string LevelSelector => "a[href^='/account'] span[title]";
         private string PaginationSelector => "div.pagination__navigation span";
         private string PointsSelector => "a[href^='/account'] span.nav__points";
         private string UserNameSelector => "header a[href^='/user']";
         private string ConsentButtonSelector => "div.fc-footer-buttons-container button[aria-label='Consent']";
-
 
         public SteamGiftPage(IPage page) : base(page)
         {
@@ -83,6 +82,9 @@ namespace SteamGifts.Client.Pages
         {
             var elements = await Page.QuerySelectorAllAsync(PointsSelector);
             var points = elements.FirstOrDefault();
+            if (points is null)
+                return 0;
+
             try
             {
                 var text = await points.InnerTextAsync();
@@ -99,7 +101,10 @@ namespace SteamGifts.Client.Pages
         {
             var elements = await Page.QuerySelectorAllAsync(UserNameSelector);
             var userNameElement = elements.FirstOrDefault();
-            var href = await userNameElement?.GetAttributeAsync("href") ?? string.Empty;
+            if (userNameElement is null)
+                return string.Empty;
+
+            var href = await userNameElement.GetAttributeAsync("href") ?? string.Empty;
             var username = href.Split('/').LastOrDefault() ?? string.Empty;
             return username;
         }
@@ -133,7 +138,7 @@ namespace SteamGifts.Client.Pages
                 var userNameVisible = await elements.IsVisibleAsync();
                 return userNameVisible;
             }
-            catch (Exception ex)
+            catch
             {
                 return false;
             }
@@ -143,8 +148,7 @@ namespace SteamGifts.Client.Pages
         {
             var elements = await Page.QuerySelectorAllAsync(PaginationSelector);
             var pagination = elements.LastOrDefault();
-            var nextPageExists = await pagination?.InnerTextAsync() == "Next";
-            return nextPageExists;
+            return pagination is not null && await pagination.InnerTextAsync() == "Next";
         }
 
         public async Task<bool> IsConsentButtonVisibleAsync()

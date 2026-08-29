@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk.Web">
 
 	<PropertyGroup>
-		<TargetFramework>net8.0</TargetFramework>
+		<TargetFramework>net10.0</TargetFramework>
 		<Nullable>enable</Nullable>
 		<ImplicitUsings>enable</ImplicitUsings>
 		<UserSecretsId>ddd7484a-287d-4e6e-8e48-7a5eadad677d</UserSecretsId>
@@ -28,13 +28,10 @@
 		<PackageReference Include="Hangfire.MissionControl" Version="0.10.0" />
 		<PackageReference Include="Hangfire.PostgreSql" Version="1.20.12" />
 		<PackageReference Include="Hangfire.RecurringJobExtensions" Version="1.1.6" />
-		<PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
 		<PackageReference Include="Serilog" Version="4.0.1" />
 		<PackageReference Include="Serilog.AspNetCore" Version="8.0.2" />
 		<PackageReference Include="Serilog.Settings.Configuration" Version="8.0.2" />
 		<PackageReference Include="Serilog.Sinks.Console" Version="6.0.0" />
-		<PackageReference Include="Microsoft.Extensions.Logging" Version="9.0.7" />
-		<PackageReference Include="Microsoft.Playwright" Version="1.53.0" />
 	</ItemGroup>
 
 	<ItemGroup>
@@ -46,8 +43,8 @@
 	</ItemGroup>
 
 	<ItemGroup>
-	  <ProjectReference Include="..\Clients\SteamGifts.Client\SteamGifts.Client.csproj" />
-	  <ProjectReference Include="..\Clients\SteamPowered.Client\SteamPowered.Client.csproj" />
+	  <ProjectReference Include="..\Libraries\Giveaway.Application\Giveaway.Application.csproj" />
+	  <ProjectReference Include="..\Libraries\Giveaway.Composition\Giveaway.Composition.csproj" />
 	  <ProjectReference Include="..\Clients\TelegramNotifier.Client\TelegramNotifier.Client.csproj" />
 	</ItemGroup>
 

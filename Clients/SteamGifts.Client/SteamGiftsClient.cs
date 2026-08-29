@@ -19,7 +19,7 @@ namespace SteamGifts.Client
             _logger = logger;
         }
 
-        public async Task AuthAsync(string tocken)
+        public async Task AuthAsync(string token)
         {
             var page = new SteamGiftPage(_page);
             await page.GoToPage(1);
@@ -29,7 +29,7 @@ namespace SteamGifts.Client
                 _logger?.LogInformation("User is not authorized, attempting to authenticate with token.");
                 var context = _page.Context;
                 await context.ClearCookiesAsync();
-                var phpsessidCookie = new Cookie { Name = "PHPSESSID", Value = tocken, Domain = "www.steamgifts.com", Path = "/" };
+                var phpsessidCookie = new Cookie { Name = "PHPSESSID", Value = token, Domain = "www.steamgifts.com", Path = "/" };
                 await context.AddCookiesAsync([phpsessidCookie]);
                 await _page.ReloadAsync();
             }
@@ -43,7 +43,7 @@ namespace SteamGifts.Client
         public async Task<SteamGiftsUserInfo> GetUserInfoAsync()
         {
             var page = new SteamGiftPage(_page);
-            await page.GoToPage(1);
+            //await page.GoToPage(1);
             await Task.Delay(DefaultWaitTime);
             var isAuthorized = await page.IsAuthorizedAsync();
             if (isAuthorized == false)
@@ -121,6 +121,22 @@ namespace SteamGifts.Client
             bool result = await page.PerformEnterAsync();
 
             _logger?.LogInformation("Joined giveaway {Url}: {Result}", giveawayUrl, result);
+
+            return result;
+        }
+
+        public async Task<bool> HideGiveawayAsync(string giveawayUrl)
+        {
+            var page = new GiveawayPage(_page, _baseUrl + giveawayUrl);
+
+            _logger?.LogDebug("Trying to hide giveaway: {Url}", giveawayUrl);
+
+            await page.GoToPageAsync();
+            await Task.Delay(DefaultWaitTime);
+
+            var result = await page.PerformHideAsync();
+
+            _logger?.LogInformation("Hidden giveaway {Url}: {Result}", giveawayUrl, result);
 
             return result;
         }

@@ -1,211 +1,71 @@
-﻿using AutoRunner.Factories;
+using Giveaway.Application;
 
 using Hangfire;
 using Hangfire.MissionControl;
 using Hangfire.RecurringJobExtensions;
 
-using Microsoft.Playwright;
-
-using SteamGifts.Client;
-using SteamGifts.Client.Models;
-
-using SteamPowered.Client;
-
-using System.Text;
-
 using TelegramNotifier.Client;
 
-namespace AutoRunner.Jobs
+namespace AutoRunner.Jobs;
+
+[MissionLauncher(CategoryName = "SteamGifts")]
+public sealed class SteamGiftsJoinJob
 {
-    public class GiveawayStats
+    private readonly ILogger<SteamGiftsJoinJob> _logger;
+    private readonly ITelegramNotifier<SteamGiftsJoinJob> _telegramNotifier;
+    private readonly SteamGiftsAutomationService _automationService;
+
+    public SteamGiftsJoinJob(
+        ILogger<SteamGiftsJoinJob> logger,
+        ITelegramNotifier<SteamGiftsJoinJob> telegramNotifier,
+        SteamGiftsAutomationService automationService)
     {
-        public int Total { get; set; }
-        public int Joined { get; set; }
-        public int SkippedCollections { get; set; }
-        public int AlreadyJoined { get; set; }
-        public int InsufficientPoints { get; set; }
-        public int FailedJoins { get; set; }
+        _logger = logger;
+        _telegramNotifier = telegramNotifier;
+        _automationService = automationService;
     }
 
-    [MissionLauncher(CategoryName = "SteamGift")]
-    public class SteamGiftsJoinJob
+    [Mission(Name = "Join SteamGifts Giveaways", Description = "Filters, joins, and hides SteamGifts giveaways")]
+    [JobDisplayName("SteamGifts: Process Giveaways")]
+    public Task JoinGiveaways(IJobCancellationToken cancellationToken) =>
+        JoinGiveaways(cancellationToken, withDelay: false);
+
+    [RecurringJob("0 9,20 * * *", TimeZone = "FLE Standard Time", RecurringJobId = "SteamGifts: Process Giveaways")]
+    [AutomaticRetry(Attempts = 0)]
+    [JobDisplayName("SteamGifts: Process Giveaways")]
+    public async Task JoinGiveaways(IJobCancellationToken cancellationToken, bool? withDelay)
     {
-        private readonly ILogger<SteamGiftsJoinJob> _logger;
-        private readonly ITelegramNotifier<SteamGiftsJoinJob> _telegramNotifier;
-        private readonly ISteamPoweredClient _steamPoweredClient;
-        private readonly IPlaywrightDriverFactory _playwrightDriverFactory;
-        private readonly string _token;
+        if (withDelay ?? true)
+            await WaitRandomDelayAsync(cancellationToken, TimeSpan.FromHours(1));
 
-        public SteamGiftsJoinJob(ILogger<SteamGiftsJoinJob> logger,
-            ITelegramNotifier<SteamGiftsJoinJob> telegramNotifier,
-            IConfiguration configuration,
-            ISteamPoweredClient steamPoweredClient,
-            IPlaywrightDriverFactory playwrightDriverFactory)
+        await _telegramNotifier.SendTextAsync("Starting SteamGifts giveaway job...");
+
+        try
         {
-            _logger = logger;
-            _telegramNotifier = telegramNotifier;
-            _steamPoweredClient = steamPoweredClient;
-            _playwrightDriverFactory = playwrightDriverFactory;
-            _token = configuration["SteamGifts:Token"] ?? throw new ArgumentNullException("SteamGifts token is not configured");
+            var summary = await _automationService.RunAsync(cancellationToken.ShutdownToken);
+            await _telegramNotifier.SendTextAsync(summary.ToDisplayText());
         }
-
-        [Mission(Name = "Join SteamGifts Giveaways", Description = "Automatically joins available SteamGifts giveaways")]
-
-        [JobDisplayName("SteamGifts: Auto Join Giveaways")]
-        public async Task JoinGiveaways(IJobCancellationToken cancellationToken)
+        catch (Exception exception)
         {
-            await JoinGiveaways(cancellationToken, false);
-        }
-
-        [RecurringJob("0 9,20 * * *", TimeZone = "FLE Standard Time", RecurringJobId = "SteamGifts: Auto Join Giveaways")]
-        [AutomaticRetry(Attempts = 0)]
-        [JobDisplayName("SteamGifts: Auto Join Giveaways")]
-        public async Task JoinGiveaways(IJobCancellationToken cancellationToken, bool? withDelay)
-        {
-            if (withDelay ?? true)
-            {
-                await WaitRandomDelayAsync(cancellationToken, TimeSpan.FromHours(1));
-            }
-
-            await _telegramNotifier.SendTextAsync("🟢 Starting SteamGifts giveaway join job...");
-            var stats = new GiveawayStats();
-            await using var ctx = await _playwrightDriverFactory.CreateContextAsync();
-            var page = ctx.Page;
+            _logger.LogError(exception, "Unhandled exception in SteamGifts job");
 
             try
             {
-                var steamGiftsClient = new SteamGiftsClient(page, _logger);
-                await steamGiftsClient.AuthAsync(_token);
-                var user = await steamGiftsClient.GetUserInfoAsync();
-                var giveaways = await steamGiftsClient.GetAllGiveawaysAsync();
-                stats.Total = giveaways.Count();
-                var currentPoints = user.Points;
-                _logger.LogInformation("📝 Fetched {Count} giveaways from SteamGifts", giveaways.Count());
-
-                List<(SteamGiftsGiveaway Giveaway, double Rating, double TotalReviews, double Score)> giveawayToReviews = new();
-
-                foreach (var g in giveaways.Where(e=>!e.IsCollection))
-                {
-                    if (string.IsNullOrEmpty(g.ApplicationId))
-                        _logger.LogWarning("⚠️ Giveaway {GameName} has no ApplicationId, skipping review fetch", g.GameName);
-
-                    var review = await _steamPoweredClient.GetAppReviewsAsync(g.ApplicationId);
-                    if (review != null)
-                    {
-                        var score = review.Rating * Math.Log10(review.TotalReviews + 1);
-                        giveawayToReviews.Add((g, review.Rating, review.TotalReviews, score));
-                        _logger.LogInformation("📊 Fetched reviews for {GameName}: {Rating:F2}%, Total reviews: {TotalReviews}",
-                            g.GameName, review.Rating, review.TotalReviews);
-                    }
-                    else
-                    {
-                        _logger.LogWarning("⚠️ Failed to fetch reviews for game: {GameName}, AppId: {AppId}",
-                              g.GameName, g.ApplicationId);
-                        continue;
-                    }
-                }
-
-                foreach (var giveawayToReview in giveawayToReviews.OrderByDescending(e => e.Score))
-                {
-                    var giveaway = giveawayToReview.Giveaway;
-                    _logger.LogInformation("🎯 Processing giveaway: {GameName}, AppId: {AppId}, Required points: {Points}, Current points: {CurrentPoints}",
-                       giveaway.GameName, giveaway.ApplicationId, giveaway.Points, currentPoints);
-                    _logger.LogInformation("📊 Review for {GameName}: {Rating:F2}%, Total reviews: {TotalReviews}, Score: {Score}",
-                      giveaway.GameName, giveawayToReview.Rating, giveawayToReview.TotalReviews, giveawayToReview.Score);
-
-                    if (giveaway.Joined)
-                    {
-                        stats.AlreadyJoined++;
-                        _logger.LogInformation("🔒 Already joined giveaway: {GameName}", giveaway.GameName);
-                        continue;
-                    }
-
-                    if (giveaway.IsCollection)
-                    {
-                        stats.SkippedCollections++;
-                        _logger.LogInformation("🔁 Skipped collection giveaway: {GameName}", giveaway.GameName);
-                        continue;
-                    }
-
-                    if (currentPoints < giveaway.Points)
-                    {
-                        stats.InsufficientPoints++;
-                        _logger.LogInformation("⛔ Not enough points to join: {GameName} (Required: {Points}, Available: {CurrentPoints})",
-                            giveaway.GameName, giveaway.Points, currentPoints);
-                        continue;
-                    }
-
-                    _logger.LogDebug("🟢 Sufficient points, trying to join giveaway: {GameName}", giveaway.GameName);
-                    var joinResult = await steamGiftsClient.JoinGiveawayAsync(giveaway.GiveawayUrl);
-                    if (joinResult)
-                    {
-                        stats.Joined++;
-                        _logger.LogInformation("✅ Successfully joined giveaway: {GameName} (Points: {Points})", giveaway.GameName, giveaway.Points);
-                        currentPoints -= giveaway.Points;
-                    }
-                    else
-                    {
-                        stats.FailedJoins++;
-                        _logger.LogWarning("❌ Failed to join giveaway: {GameName}", giveaway.GameName);
-                    }
-
-                    await Task.Delay(2000);
-                }
-                await SendSummaryAsync(stats, currentPoints);
+                await _telegramNotifier.SendTextAsync($"SteamGifts job failed:\n<pre>{exception.Message}</pre>");
             }
-            catch (Exception ex)
+            catch (Exception notificationException)
             {
-                await HandleErrorAsync(ex, page);
-                throw;
+                _logger.LogError(notificationException, "Failed to send SteamGifts error notification to Telegram");
             }
+
+            throw;
         }
+    }
 
-        private async Task SendSummaryAsync(GiveawayStats stats, int remainingPoints)
-        {
-            var sb = new StringBuilder();
-            sb.AppendLine("🎉 <b>SteamGifts Giveaway Join Summary</b>");
-            sb.AppendLine($"🧾 Total giveaways: <b>{stats.Total}</b>");
-            sb.AppendLine($"✅ Joined: <b>{stats.Joined}</b>");
-            sb.AppendLine($"🔁 Skipped collections: <b>{stats.SkippedCollections}</b>");
-            sb.AppendLine($"🔒 Already joined: <b>{stats.AlreadyJoined}</b>");
-            sb.AppendLine($"⛔ Not enough points: <b>{stats.InsufficientPoints}</b>");
-            sb.AppendLine($"❌ Failed to join: <b>{stats.FailedJoins}</b>");
-            sb.AppendLine($"🎯 Remaining points: <b>{remainingPoints}</b>");
-
-            await _telegramNotifier.SendTextAsync(sb.ToString());
-        }
-
-        private async Task HandleErrorAsync(Exception ex, IPage page)
-        {
-            _logger.LogError(ex, "Unhandled exception in SteamGifts job");
-
-            try
-            {
-                await _telegramNotifier.SendTextAsync($"❌ Exception in SteamGifts job:\n```\n{ex.Message}\n```");
-
-                var screenshotBytes = await page.ScreenshotAsync(new() { FullPage = true });
-                await _telegramNotifier.SendScreenshotAsync(screenshotBytes, "🖼️ Screenshot at exception");
-
-                var html = await page.ContentAsync();
-                var htmlBytes = Encoding.UTF8.GetBytes(html);
-                using var htmlStream = new MemoryStream(htmlBytes);
-                await _telegramNotifier.SendFileAsync(htmlStream, "page.html", "📄 Page HTML at exception");
-            }
-            catch (Exception notifyEx)
-            {
-                _logger.LogError(notifyEx, "Failed to send error notification to Telegram");
-            }
-        }
-
-        private async Task WaitRandomDelayAsync(IJobCancellationToken cancellationToken, TimeSpan delayTime)
-        {
-            var random = new Random();
-            int delayMilliseconds = random.Next(0, (int)delayTime.TotalMilliseconds);
-            var delay = TimeSpan.FromMilliseconds(delayMilliseconds);
-
-            _logger.LogInformation("⏳ Waiting for {DelayMinutes} minutes before starting giveaway job...", delay.TotalMinutes);
-
-            await Task.Delay(delay, cancellationToken.ShutdownToken);
-        }
+    private async Task WaitRandomDelayAsync(IJobCancellationToken cancellationToken, TimeSpan maximumDelay)
+    {
+        var delay = TimeSpan.FromMilliseconds(Random.Shared.NextDouble() * maximumDelay.TotalMilliseconds);
+        _logger.LogInformation("Waiting {DelayMinutes:F1} minutes before the SteamGifts job", delay.TotalMinutes);
+        await Task.Delay(delay, cancellationToken.ShutdownToken);
     }
 }

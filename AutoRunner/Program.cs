@@ -1,6 +1,6 @@
-using AutoRunner.Factories;
 using AutoRunner.Jobs;
-using AutoRunner.Services;
+
+using Giveaway.Composition;
 
 using Hangfire;
 using Hangfire.Console;
@@ -11,103 +11,87 @@ using Hangfire.MissionControl;
 using Hangfire.PostgreSql;
 using Hangfire.RecurringJobExtensions;
 
-using Microsoft.Playwright;
-
-using SteamPowered.Client;
-
-using System.Threading.Tasks;
-
 using TelegramNotifier.Client.Extensions;
 
-namespace AutoRunner
+namespace AutoRunner;
+
+public class Program
 {
-    public class Program
+    public static void Main(string[] args)
     {
-        public static async Task Main(string[] args)
-        {
-            var builder = WebApplication.CreateBuilder(args);
+        var builder = WebApplication.CreateBuilder(args);
 
-            var connStr = builder.Configuration.GetConnectionString("DefaultConnection");
-            builder.Services.AddControllers();
+        builder.Services.AddControllers();
 
-            builder.Services.AddHangfire(config =>
-                  config.SetDataCompatibilityLevel(CompatibilityLevel.Version_170)
-                        .UseSimpleAssemblyNameTypeSerializer()
-                        .UseRecommendedSerializerSettings()
+        builder.Services.AddHangfire(config =>
+              config.SetDataCompatibilityLevel(CompatibilityLevel.Version_170)
+                    .UseSimpleAssemblyNameTypeSerializer()
+                    .UseRecommendedSerializerSettings()
 #if DEBUG
-                        .UseMemoryStorage()
+                    .UseMemoryStorage()
 #else
-                        .UsePostgreSqlStorage(
-                            options => options.UseNpgsqlConnection(builder.Configuration.GetConnectionString("DefaultConnection")),
-                            new PostgreSqlStorageOptions { SchemaName = "hangfire" })
+                    .UsePostgreSqlStorage(
+                        options => options.UseNpgsqlConnection(builder.Configuration.GetConnectionString("DefaultConnection")),
+                        new PostgreSqlStorageOptions { SchemaName = "hangfire" })
 #endif
-                      .UseRecurringJob(typeof(SteamGiftsJoinJob))
-                      .UseConsole()
-            .UseMissionControl(new MissionControlOptions()
+                  .UseRecurringJob(typeof(SteamGiftsJoinJob))
+                  .UseConsole()
+        .UseMissionControl(
+            new MissionControlOptions
             {
-                RequireConfirmation = false,    // Отключение подтверждения для запуска задач
-                HideCodeSnippet = false         // Отображение кода задачи
+                RequireConfirmation = false,
+                HideCodeSnippet = false
             },
-            typeof(SteamGiftsJoinJob).Assembly)
-            );
+            typeof(SteamGiftsJoinJob).Assembly));
 
-            builder.Services.AddHangfireServer(options =>
-            {
-                options.ServerName = builder.Configuration["Hangfire:ServerName"] ?? "default-server";
-                options.WorkerCount = 1; // Количество воркеров, обрабатывающих задачи
-            });
+        builder.Services.AddHangfireServer(options =>
+        {
+            options.ServerName = builder.Configuration["Hangfire:ServerName"] ?? "default-server";
+            options.WorkerCount = 1;
+        });
 
-            builder.Services.AddTelegramNotifier(builder.Configuration);
+        builder.Services.AddTelegramNotifier(builder.Configuration);
+        builder.Services.AddGiveawayAutomation(builder.Configuration);
+        builder.Services.AddHangfireConsoleExtensions();
 
-            builder.Services.AddMemoryCache();
-            builder.Services.AddHttpClient<ISteamPoweredClient, SteamPoweredCachedService>();
-
-            builder.Services.AddSingleton<IPlaywrightDriverFactory, PlaywrightDriverFactory>();
-
-#if RELEASE
-            builder.WebHost.UseUrls("http://0.0.0.0:5000");
+#if !DEBUG
+        builder.WebHost.UseUrls("http://0.0.0.0:5000");
 #endif
 
-            builder.Services.AddHangfireConsoleExtensions();
+        var app = builder.Build();
 
-            var app = builder.Build();
-
-            app.UseStaticFiles();
-
-            // Configure the HTTP request pipeline.
-            app.UseHttpsRedirection();
-
-            app.MapControllers();
+        app.UseStaticFiles();
+        app.UseHttpsRedirection();
+        app.MapControllers();
 
 #if DEBUG
-            app.UseHangfireDashboard();
+        app.UseHangfireDashboard();
 #else
-            app.UseHangfireDashboard(options: new DashboardOptions()
-            {
-                DashboardTitle = "AutoRunner",
-                FaviconPath = "/favicon.ico",
-                DarkModeEnabled = true,
-                Authorization =
-                [
-                    new BasicAuthAuthorizationFilter(new BasicAuthAuthorizationFilterOptions()
-                    {
-                        RequireSsl = false,
-                        SslRedirect = false,
-                        LoginCaseSensitive = true,
-                        Users = new []
+        app.UseHangfireDashboard(options: new DashboardOptions
+        {
+            DashboardTitle = "AutoRunner",
+            FaviconPath = "/favicon.ico",
+            DarkModeEnabled = true,
+            Authorization =
+            [
+                new BasicAuthAuthorizationFilter(new BasicAuthAuthorizationFilterOptions
+                {
+                    RequireSsl = false,
+                    SslRedirect = false,
+                    LoginCaseSensitive = true,
+                    Users =
+                    [
+                        new BasicAuthAuthorizationUser
                         {
-                            new BasicAuthAuthorizationUser()
-                            {
-                                Login = builder.Configuration["Hangfire:Login"],
-                                PasswordClear = builder.Configuration["Hangfire:Password"]
-                            }
+                            Login = builder.Configuration["Hangfire:Login"],
+                            PasswordClear = builder.Configuration["Hangfire:Password"]
                         }
-                    })
-                ]
-            });
+                    ]
+                })
+            ]
+        });
 #endif
 
-            app.Run();
-        }
+        app.Run();
     }
 }

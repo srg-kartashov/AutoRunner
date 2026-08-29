@@ -1,13 +1,15 @@
-﻿using Microsoft.Extensions.Logging;
+using Giveaway.Contracts.Models;
+using Giveaway.Contracts.Ports;
+
+using Microsoft.Extensions.Logging;
 
 using Newtonsoft.Json;
 
 using SteamPowered.Client.DTOs;
-using SteamPowered.Client.Models;
 
 namespace SteamPowered.Client
 {
-    public class SteamPoweredClient : ISteamPoweredClient
+    public class SteamPoweredClient : IAppReviewsProvider
     {
         private const string BaseUrl = "https://store.steampowered.com";
         private readonly HttpClient _httpClient;
@@ -20,14 +22,14 @@ namespace SteamPowered.Client
             _logger = logger;
         }
 
-        public async Task<AppReviews?> GetAppReviewsAsync(string applicationId)
+        public async Task<AppReview?> GetAppReviewsAsync(string applicationId, CancellationToken cancellationToken = default)
         {
             try
             {
-                var response = await _httpClient.GetAsync($"/appreviews/{applicationId}?json=1&language=all");
+                var response = await _httpClient.GetAsync($"/appreviews/{applicationId}?json=1&language=all", cancellationToken);
                 response.EnsureSuccessStatusCode();
 
-                var json = await response.Content.ReadAsStringAsync();
+                var json = await response.Content.ReadAsStringAsync(cancellationToken);
                 var dto = JsonConvert.DeserializeObject<AppReviewsDto>(json);
 
                 if (dto?.QuerySummary == null)
@@ -38,13 +40,13 @@ namespace SteamPowered.Client
                     ? summary.TotalPositive / (double)summary.TotalReviews * 100.0
                     : 0;
 
-                return new AppReviews
+                return new AppReview
                 {
                     TotalReviews = summary.TotalReviews,
                     Rating = rating
                 };
             }
-            catch (Exception ex)
+            catch (Exception ex) when (ex is not OperationCanceledException)
             {
                 _logger?.LogWarning(ex, "Failed to fetch app reviews for AppId: {AppId}", applicationId);
                 return null;
