@@ -1,0 +1,75 @@
+name: Publish SteamGifts
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: Release version in SemVer format, for example 1.0.1
+        required: true
+        type: string
+
+permissions:
+  contents: write
+
+jobs:
+  publish:
+    runs-on: windows-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Install .NET SDK
+        uses: actions/setup-dotnet@v4
+        with:
+          global-json-file: global.json
+
+      - name: Restore dependencies
+        run: dotnet restore AutoRunner.sln --verbosity minimal
+
+      - name: Validate version and publish application
+        shell: pwsh
+        env:
+          RELEASE_VERSION: ${{ inputs.version }}
+        run: |
+          if ($env:RELEASE_VERSION -notmatch '^\d+\.\d+\.\d+([-.+][0-9A-Za-z.-]+)?$') {
+            throw "Release version must use SemVer, for example 1.0.1."
+          }
+
+          dotnet publish AutoRunner.Console\AutoRunner.Console.csproj `
+            --configuration Release `
+            --runtime win-x64 `
+            --self-contained true `
+            --output artifacts\publish `
+            "-p:Version=$env:RELEASE_VERSION"
+
+      - name: Package and publish Velopack release
+        shell: pwsh
+        env:
+          RELEASE_VERSION: ${{ inputs.version }}
+          GITHUB_TOKEN: ${{ github.token }}
+        run: |
+          dotnet tool install vpk --tool-path .tools --version 1.2.0
+
+          .\.tools\vpk.exe download github `
+            --repoUrl https://github.com/${{ github.repository }} `
+            --token $env:GITHUB_TOKEN `
+            --outputDir artifacts\releases
+
+          .\.tools\vpk.exe pack `
+            --packId SteamGifts `
+            --packVersion $env:RELEASE_VERSION `
+            --packDir artifacts\publish `
+            --mainExe SteamGifts.exe `
+            --packTitle SteamGifts `
+            --icon AutoRunner.Console\Assets\SteamGifts.ico `
+            --runtime win-x64 `
+            --outputDir artifacts\releases
+
+          .\.tools\vpk.exe upload github `
+            --repoUrl https://github.com/${{ github.repository }} `
+            --token $env:GITHUB_TOKEN `
+            --outputDir artifacts\releases `
+            --publish `
+            --releaseName "SteamGifts $env:RELEASE_VERSION" `
+            --tag "v$env:RELEASE_VERSION"

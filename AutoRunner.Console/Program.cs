@@ -9,12 +9,22 @@ using Microsoft.Extensions.Logging;
 using TelegramNotifier.Client;
 using TelegramNotifier.Client.Extensions;
 
+using Velopack;
+
 namespace AutoRunner.ConsoleApp;
 
 public class Program
 {
-    public static async Task<int> Main(string[] args)
+    public static int Main(string[] args)
     {
+        VelopackApp.Build().Run();
+
+        return RunAsync(args).GetAwaiter().GetResult();
+    }
+
+    private static async Task<int> RunAsync(string[] args)
+    {
+
         Console.Title = "SteamGifts";
 
         using var cancellationSource = new CancellationTokenSource();
@@ -26,6 +36,10 @@ public class Program
 
         using var host = BuildHost(args);
         var logger = host.Services.GetRequiredService<ILoggerFactory>().CreateLogger("AutoRunner.Console");
+
+        if (await SteamGiftsUpdater.TryUpdateAndRestartAsync(logger))
+            return 0;
+
         var hostStarted = false;
         await using var scope = host.Services.CreateAsyncScope();
         var notifier = scope.ServiceProvider.GetService<ITelegramNotifier<Program>>();
@@ -66,14 +80,19 @@ public class Program
     private static IHost BuildHost(string[] args)
     {
         var executableDirectory = Path.GetDirectoryName(Environment.ProcessPath) ?? AppContext.BaseDirectory;
-        var appSettingsPath = Path.Combine(executableDirectory, "appsettings.json");
+        var applicationData = SteamGiftsApplicationData.Initialize(executableDirectory);
         var builder = Host.CreateApplicationBuilder(new HostApplicationBuilderSettings
         {
             Args = args,
             ContentRootPath = executableDirectory
         });
         builder.Configuration
-            .AddJsonFile(appSettingsPath, optional: false, reloadOnChange: false)
+            .AddJsonFile(applicationData.SettingsFilePath, optional: false, reloadOnChange: false)
+            .AddInMemoryCollection(new Dictionary<string, string?>
+            {
+                ["SteamGifts:Browser:UserDataDirectory"] = applicationData.BrowserProfileDirectory,
+                ["SteamPowered:ReviewsCache:DatabasePath"] = applicationData.ReviewsCacheFilePath
+            })
             .AddEnvironmentVariables()
             .AddCommandLine(args);
 
