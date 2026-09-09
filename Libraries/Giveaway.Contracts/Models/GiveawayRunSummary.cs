@@ -19,18 +19,11 @@ public sealed class GiveawayRunSummary
     public string ToDisplayText() => string.Join(Environment.NewLine,
     [
         "SteamGifts giveaway summary",
-        $"User: {User.Username} (level {User.Level})",
         $"Total giveaways: {TotalGiveaways}",
         $"Joined: {Joined}",
         $"Hidden: {Hidden}",
         $"Already joined: {AlreadyJoined}",
-        $"Skipped collections: {SkippedCollections}",
-        $"Skipped by level: {SkippedByLevel}",
-        $"Missing review data: {MissingReviewData}",
         $"Skipped by filter: {SkippedByFilter}",
-        $"Insufficient points: {InsufficientPoints}",
-        $"Failed joins: {FailedJoins}",
-        $"Failed hides: {FailedHides}",
-        $"Remaining points: {RemainingPoints}"
+        $"Insufficient points: {InsufficientPoints}"
     ]);
 }

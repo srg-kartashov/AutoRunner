@@ -15,6 +15,8 @@ public class Program
 {
     public static async Task<int> Main(string[] args)
     {
+        Console.Title = "SteamGifts";
+
         using var cancellationSource = new CancellationTokenSource();
         Console.CancelKeyPress += (_, eventArgs) =>
         {
@@ -63,11 +65,18 @@ public class Program
 
     private static IHost BuildHost(string[] args)
     {
+        var executableDirectory = Path.GetDirectoryName(Environment.ProcessPath) ?? AppContext.BaseDirectory;
+        var appSettingsPath = Path.Combine(executableDirectory, "appsettings.json");
         var builder = Host.CreateApplicationBuilder(new HostApplicationBuilderSettings
         {
             Args = args,
-            ContentRootPath = AppContext.BaseDirectory
+            ContentRootPath = executableDirectory
         });
+        builder.Configuration
+            .AddJsonFile(appSettingsPath, optional: false, reloadOnChange: false)
+            .AddEnvironmentVariables()
+            .AddCommandLine(args);
+
         builder.Logging.ClearProviders();
         builder.Logging.AddConfiguration(builder.Configuration.GetSection("Logging"));
         builder.Logging.AddSimpleConsole();
