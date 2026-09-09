@@ -26,6 +26,7 @@ public class Program
     {
 
         Console.Title = "SteamGifts";
+        WriteStartupLogo();
 
         using var cancellationSource = new CancellationTokenSource();
         Console.CancelKeyPress += (_, eventArgs) =>
@@ -128,5 +129,22 @@ public class Program
         {
             logger.LogWarning(exception, "Failed to send console notification to Telegram");
         }
+    }
+
+    private static void WriteStartupLogo()
+    {
+        const string logo = """
+             _____ _                       _____ _  __ _       
+            / ____| |                     / ____| |/ _| |      
+           | (___ | |_ ___  __ _ _ __ ___ | |  __| | |_| |_ ___ 
+            \___ \| __/ _ \/ _` | '_ ` _ \| | |_ | |  _| __/ __|
+            ____) | ||  __/ (_| | | | | | | |__| | | | | |_\__ \
+           |_____/ \__\___|\__,_|_| |_| |_|\_____|_|_|  \__|___/
+        """;
+
+        var previousColor = Console.ForegroundColor;
+        Console.ForegroundColor = ConsoleColor.DarkGreen;
+        Console.WriteLine(logo);
+        Console.ForegroundColor = previousColor;
     }
 }
