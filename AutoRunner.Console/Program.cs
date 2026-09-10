@@ -100,6 +100,7 @@ public class Program
         builder.Logging.ClearProviders();
         builder.Logging.AddConfiguration(builder.Configuration.GetSection("Logging"));
         builder.Logging.AddSimpleConsole();
+        builder.Logging.AddProvider(new FileLoggerProvider(applicationData.LogsDirectory));
 
         builder.Services.AddGiveawayAutomation(builder.Configuration, AppReviewsCacheStorage.Sqlite);
 

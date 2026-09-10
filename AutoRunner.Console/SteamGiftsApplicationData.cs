@@ -12,6 +12,7 @@ internal sealed class SteamGiftsApplicationData
         SettingsFilePath = Path.Combine(rootDirectory, SettingsFileName);
         BrowserProfileDirectory = Path.Combine(rootDirectory, BrowserProfileDirectoryName);
         ReviewsCacheFilePath = Path.Combine(rootDirectory, "data", "steam-reviews-cache.db");
+        LogsDirectory = Path.Combine(rootDirectory, "logs");
     }
 
     public string RootDirectory { get; }
@@ -21,6 +22,8 @@ internal sealed class SteamGiftsApplicationData
     public string BrowserProfileDirectory { get; }
 
     public string ReviewsCacheFilePath { get; }
+
+    public string LogsDirectory { get; }
 
     public static SteamGiftsApplicationData Initialize(string executableDirectory)
     {
