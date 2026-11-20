@@ -11,7 +11,7 @@ namespace SteamPowered.Client
 {
     public class SteamPoweredClient : IAppReviewsProvider
     {
-        private const string BaseUrl = "https://store.steampowered.com";
+        private const string BaseUrl = "https://api.steampowered.com";
         private readonly HttpClient _httpClient;
         private readonly ILogger<SteamPoweredClient>? _logger;
 
@@ -26,16 +26,23 @@ namespace SteamPowered.Client
         {
             try
             {
-                var response = await _httpClient.GetAsync($"/appreviews/{applicationId}?json=1&language=all", cancellationToken);
+                var inputJson = JsonConvert.SerializeObject(new
+                {
+                    appid = uint.Parse(applicationId, System.Globalization.CultureInfo.InvariantCulture),
+                    languages = new[] { "all" }
+                });
+                using var response = await _httpClient.GetAsync(
+                    $"{BaseUrl}/IUserReviewsService/GetAppReviews/v1/?input_json={Uri.EscapeDataString(inputJson)}",
+                    cancellationToken);
                 response.EnsureSuccessStatusCode();
 
                 var json = await response.Content.ReadAsStringAsync(cancellationToken);
-                var dto = JsonConvert.DeserializeObject<AppReviewsDto>(json);
+                var dto = JsonConvert.DeserializeObject<AppReviewsResponseDto>(json);
 
-                if (dto?.QuerySummary == null)
+                if (dto?.Response?.QuerySummary == null)
                     return null;
 
-                var summary = dto.QuerySummary;
+                var summary = dto.Response.QuerySummary;
                 var rating = summary.TotalReviews > 0
                     ? summary.TotalPositive / (double)summary.TotalReviews * 100.0
                     : 0;

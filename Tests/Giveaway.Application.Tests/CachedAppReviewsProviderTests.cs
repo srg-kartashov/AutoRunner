@@ -85,7 +85,7 @@ public sealed class CachedAppReviewsProviderTests
             Interlocked.Increment(ref _requestCount);
             return Task.FromResult(new HttpResponseMessage(HttpStatusCode.OK)
             {
-                Content = new StringContent("""{"query_summary":{"total_positive":90,"total_reviews":100}}""")
+                Content = new StringContent("""{"response":{"query_summary":{"total_positive":90,"total_reviews":100}}}""")
             });
         }
     }

@@ -2,11 +2,14 @@
 
 namespace SteamPowered.Client.DTOs
 {
+    internal class AppReviewsResponseDto
+    {
+        [JsonProperty("response")]
+        public AppReviewsDto? Response { get; set; }
+    }
+
     internal class AppReviewsDto
     {
-        [JsonProperty("success")]
-        public int Success { get; set; }
-
         [JsonProperty("query_summary")]
         public QuerySummaryDto? QuerySummary { get; set; }
 
